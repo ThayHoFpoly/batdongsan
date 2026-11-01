@@ -93,7 +93,7 @@ const postContact = async (req, res, next) => {
     contact.avatarUrl = (avatarUrl || '').trim();
     contact.messengerUrl = (messengerUrl || '').trim();
     contact.zaloUrl = (zaloUrl || '').trim();
-    contact.ctaText = (ctaText || '').trim() || 'Nhận tư vấn dự án';
+    contact.ctaText = (ctaText || '').trim() || 'Liên hệ tư vấn';
     contact.isEnabled = isEnabled === 'on' || isEnabled === true || isEnabled === 'true';
 
     await contact.save();

@@ -32,15 +32,35 @@ const getHomePage = async (req, res, next) => {
       contact: Boolean(sectionMap.contact),
     };
 
-    // Build navigation items strictly for active and available sections
+    // Mapping of section types to concise navigation labels
+    const sectionNavLabels = {
+      overview: 'Tổng quan',
+      location: 'Vị trí',
+      amenities: 'Tiện ích',
+      floorPlans: 'Mặt bằng',
+      gallery: 'Thư viện',
+      news: 'Tin tức',
+    };
+
+    const sectionAnchors = {
+      overview: '#tong-quan',
+      location: '#vi-tri',
+      amenities: '#tien-ich',
+      floorPlans: '#mat-bang',
+      gallery: '#thu-vien',
+      news: '#tin-tuc',
+    };
+
+    // Build simplified navigation items strictly for active and available sections (excluding hero and contact)
     const navItems = [];
-    if (isAvailable.overview) navItems.push({ href: '#tong-quan', label: sectionMap.overview.subtitle || 'Tổng quan' });
-    if (isAvailable.location) navItems.push({ href: '#vi-tri', label: sectionMap.location.subtitle || 'Vị trí' });
-    if (isAvailable.amenities) navItems.push({ href: '#tien-ich', label: sectionMap.amenities.subtitle || 'Tiện ích' });
-    if (isAvailable.floorPlans) navItems.push({ href: '#mat-bang', label: sectionMap.floorPlans.subtitle || 'Mặt bằng' });
-    if (isAvailable.gallery) navItems.push({ href: '#thu-vien', label: sectionMap.gallery.subtitle || 'Thư viện' });
-    if (isAvailable.news) navItems.push({ href: '#tin-tuc', label: sectionMap.news.subtitle || 'Tin tức' });
-    if (isAvailable.contact) navItems.push({ href: '#lien-he', label: sectionMap.contact.subtitle || 'Liên hệ' });
+    rawSections.forEach(sec => {
+      if (sec.type !== 'hero' && sec.type !== 'contact' && isAvailable[sec.type]) {
+        navItems.push({
+          href: sectionAnchors[sec.type] || `#${sec.key || sec.type}`,
+          label: sectionNavLabels[sec.type] || 'Thông tin',
+        });
+      }
+    });
 
     res.render('public/home', {
       title: siteSettings.seo?.title || `${siteSettings.projectName} - ${siteSettings.tagline}`,

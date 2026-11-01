@@ -52,7 +52,7 @@ const SalesContactSchema = new mongoose.Schema({
   ctaText: {
     type: String,
     trim: true,
-    default: 'Nhận tư vấn dự án',
+    default: 'Liên hệ tư vấn',
     maxlength: [100, 'Nội dung CTA không được vượt quá 100 ký tự.'],
   },
   isEnabled: {

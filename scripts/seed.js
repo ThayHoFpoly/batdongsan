@@ -98,7 +98,7 @@ const seedDatabase = async () => {
       avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80',
       messengerUrl: 'https://m.me/horizonriverside.demo',
       zaloUrl: 'https://zalo.me/0901234567',
-      ctaText: 'Nhận tư vấn dự án',
+      ctaText: 'Liên hệ tư vấn',
       isEnabled: true,
     });
     console.log(`[Seed] Created SalesContact: ${contact.fullName} (${contact.phone})`);
@@ -116,7 +116,7 @@ const seedDatabase = async () => {
         heroContent: {
           headline: 'Tuyệt tác kiến trúc bên dòng chảy thanh bình',
           subheadline: 'The Horizon Riverside mở ra không gian sống tĩnh tại, nơi giá trị thiên nhiên nguyên bản hòa quyện cùng ngôn ngữ thiết kế tối giản, tinh tế.',
-          ctaText: 'Nhận tư vấn dự án',
+          ctaText: 'Liên hệ tư vấn',
           ctaLink: '#lien-he',
           secondaryBtnText: 'Khám phá tổng quan',
           secondaryBtnLink: '#tong-quan',

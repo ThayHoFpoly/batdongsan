@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản Trị Website Bất Động Sản</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+  <style>
+    body {
+      background-color: #0d1e1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 36px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+    .login-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-brand h2 {
+      font-family: 'Playfair Display', serif;
+      color: #183D35;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+    .login-brand p {
+      color: #64748B;
+      font-size: 13.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-brand">
+      <h2>HORIZON CMS</h2>
+      <p>Đăng nhập hệ thống quản trị website bất động sản</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger" role="alert">
+        <span><%= error %></span>
+      </div>
+    <% } %>
+
+    <form action="/admin/login" method="POST" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="form-group">
+        <label for="email">Địa chỉ Email quản trị <span class="required">*</span></label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="admin@grandriverfront.vn" value="<%= email || '' %>" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mật khẩu <span class="required">*</span></label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Nhập mật khẩu quản trị" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; min-height: 44px; margin-top: 10px;">
+        Đăng nhập vào hệ thống
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; font-size: 13px; color: #64748B;">
+      <a href="/">&larr; Quay lại trang chủ công khai</a> &bull; <a href="/db-status">Kiểm tra kết nối DB</a>
+    </div>
+  </div>
+</body>
+</html>

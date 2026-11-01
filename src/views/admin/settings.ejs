@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../partials/admin-header') %>
+
+      <main class="admin-body">
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger"><%= errorMsg %></div>
+        <% } %>
+
+        <form action="/admin/settings" method="POST" data-track-changes="true" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <!-- 1. Cài Đặt Chung & Thương Hiệu -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">1. Thông tin thương hiệu & Dự án</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="projectName">Tên dự án bất động sản <span class="required">*</span></label>
+                  <input type="text" id="projectName" name="projectName" class="form-control" value="<%= settings.projectName %>" required>
+                </div>
+                <div class="form-group">
+                  <label for="siteName">Tên hiển thị website <span class="required">*</span></label>
+                  <input type="text" id="siteName" name="siteName" class="form-control" value="<%= settings.siteName %>" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="tagline">Thông điệp ngắn / Slogan dự án</label>
+                <input type="text" id="tagline" name="tagline" class="form-control" value="<%= settings.tagline || '' %>">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="developer">Đơn vị phát triển / Chủ đầu tư (Minh họa)</label>
+                  <input type="text" id="developer" name="developer" class="form-control" value="<%= settings.developer || '' %>">
+                </div>
+                <div class="form-group">
+                  <label for="address">Địa chỉ dự án</label>
+                  <input type="text" id="address" name="address" class="form-control" value="<%= settings.address || '' %>">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="shortDescription">Mô tả ngắn dự án</label>
+                <textarea id="shortDescription" name="shortDescription" class="form-control" style="min-height: 80px;"><%= settings.shortDescription || '' %></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="fullDescription">Mô tả chi tiết dự án</label>
+                <textarea id="fullDescription" name="fullDescription" class="form-control" style="min-height: 120px;"><%= settings.fullDescription || '' %></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="logoUrl">Đường dẫn Logo website</label>
+                  <div class="image-picker-group">
+                    <input type="text" id="logoUrl" name="logoUrl" class="form-control" value="<%= settings.logoUrl || '' %>" placeholder="/uploads/logo.png hoặc URL">
+                    <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#logoUrl" data-target-preview="#logoPreview">Chọn ảnh</button>
+                  </div>
+                  <% if (settings.logoUrl) { %>
+                    <img id="logoPreview" src="<%= settings.logoUrl %>" class="image-preview-thumb" alt="Logo preview">
+                  <% } else { %>
+                    <img id="logoPreview" class="image-preview-thumb" style="display: none;" alt="Logo preview">
+                  <% } %>
+                </div>
+
+                <div class="form-group">
+                  <label for="faviconUrl">Đường dẫn Favicon</label>
+                  <div class="image-picker-group">
+                    <input type="text" id="faviconUrl" name="faviconUrl" class="form-control" value="<%= settings.faviconUrl || '' %>" placeholder="/favicon.ico hoặc URL">
+                    <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#faviconUrl" data-target-preview="#faviconPreview">Chọn ảnh</button>
+                  </div>
+                  <% if (settings.faviconUrl) { %>
+                    <img id="faviconPreview" src="<%= settings.faviconUrl %>" class="image-preview-thumb" alt="Favicon preview">
+                  <% } else { %>
+                    <img id="faviconPreview" class="image-preview-thumb" style="display: none;" alt="Favicon preview">
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Danh Sách Thông Số Dự Án -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">2. Thông số dự án (Hiển thị tại Section Tổng quan)</h2>
+              <button type="button" class="btn btn-sm btn-outline" id="btnAddStatRow">+ Thêm thông số</button>
+            </div>
+            <div class="card-body">
+              <div id="statsContainer">
+                <% if (settings.projectStats && settings.projectStats.length > 0) { %>
+                  <% settings.projectStats.forEach((st, idx) => { %>
+                    <div class="form-row stat-row" style="align-items: center; margin-bottom: 12px; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border);">
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Nhãn thông số</label>
+                        <input type="text" name="statLabels" class="form-control" value="<%= st.label %>" placeholder="VD: Quy mô" required>
+                      </div>
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Giá trị</label>
+                        <input type="text" name="statValues" class="form-control" value="<%= st.value %>" placeholder="VD: 2.8 ha" required>
+                      </div>
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Ghi chú phụ</label>
+                        <input type="text" name="statSubtexts" class="form-control" value="<%= st.subtext || '' %>" placeholder="VD: Diện tích quy hoạch">
+                      </div>
+                      <button type="button" class="btn btn-sm btn-danger-outline btn-remove-stat" style="margin-top: 18px;" title="Xóa dòng này">&times;</button>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <div class="form-row stat-row" style="align-items: center; margin-bottom: 12px; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border);">
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label style="font-size: 12px;">Nhãn thông số</label>
+                      <input type="text" name="statLabels" class="form-control" placeholder="VD: Quy mô">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label style="font-size: 12px;">Giá trị</label>
+                      <input type="text" name="statValues" class="form-control" placeholder="VD: 2.8 ha">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label style="font-size: 12px;">Ghi chú phụ</label>
+                      <input type="text" name="statSubtexts" class="form-control" placeholder="VD: Quy hoạch toàn khu">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger-outline btn-remove-stat" style="margin-top: 18px;">&times;</button>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Cấu Hình SEO Mặc Định -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">3. Cấu hình SEO & Chia sẻ Mạng Xã Hội</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="seoTitle">Tiêu đề SEO mặc định (Title Tag)</label>
+                <input type="text" id="seoTitle" name="seoTitle" class="form-control" value="<%= settings.seo?.title || '' %>" maxlength="150">
+              </div>
+
+              <div class="form-group">
+                <label for="seoDescription">Thẻ mô tả SEO (Meta Description)</label>
+                <textarea id="seoDescription" name="seoDescription" class="form-control" style="min-height: 80px;" maxlength="300"><%= settings.seo?.description || '' %></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="seoOgImage">Hình ảnh chia sẻ Facebook / Zalo (OpenGraph Image)</label>
+                <div class="image-picker-group">
+                  <input type="text" id="seoOgImage" name="seoOgImage" class="form-control" value="<%= settings.seo?.ogImage || '' %>" placeholder="URL hình ảnh chia sẻ">
+                  <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#seoOgImage" data-target-preview="#seoOgPreview">Chọn từ thư viện</button>
+                </div>
+                <% if (settings.seo?.ogImage) { %>
+                  <img id="seoOgPreview" src="<%= settings.seo.ogImage %>" class="image-preview-thumb" alt="SEO OG Image preview">
+                <% } else { %>
+                  <img id="seoOgPreview" class="image-preview-thumb" style="display: none;" alt="SEO OG Image preview">
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Chân Trang & Lưu Ý Pháp Lý -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">4. Chân trang (Footer) & Lưu ý minh họa</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="copyrightText">Thông tin bản quyền (Copyright)</label>
+                <input type="text" id="copyrightText" name="copyrightText" class="form-control" value="<%= settings.footer?.copyrightText || '' %>">
+              </div>
+
+              <div class="form-group">
+                <label for="disclaimerText">Khối lưu ý minh họa (Disclaimer) <span class="required">*</span></label>
+                <textarea id="disclaimerText" name="disclaimerText" class="form-control" style="min-height: 100px;" required><%= settings.footer?.disclaimerText || '' %></textarea>
+                <div class="form-hint">Quy định: Cần thể hiện rõ hình ảnh và thông số chỉ mang tính chất minh họa tham khảo.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position: sticky; bottom: 16px; z-index: 50; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--admin-border); display: flex; justify-content: flex-end; gap: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <a href="/admin" class="btn btn-outline">Hủy bỏ</a>
+            <button type="submit" class="btn btn-primary" style="min-width: 160px;">
+              Lưu thay đổi cài đặt
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+  <script>
+    // Dynamic stat rows
+    const container = document.getElementById('statsContainer');
+    const addBtn = document.getElementById('btnAddStatRow');
+    if (addBtn && container) {
+      addBtn.addEventListener('click', () => {
+        const row = document.createElement('div');
+        row.className = 'form-row stat-row';
+        row.style = 'align-items: center; margin-bottom: 12px; background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border);';
+        row.innerHTML = `
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Nhãn thông số</label>
+            <input type="text" name="statLabels" class="form-control" placeholder="VD: Mật độ" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Giá trị</label>
+            <input type="text" name="statValues" class="form-control" placeholder="VD: 24%" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label style="font-size: 12px;">Ghi chú phụ</label>
+            <input type="text" name="statSubtexts" class="form-control" placeholder="VD: Mật độ xây dựng">
+          </div>
+          <button type="button" class="btn btn-sm btn-danger-outline btn-remove-stat" style="margin-top: 18px;" title="Xóa dòng này">&times;</button>
+        `;
+        container.appendChild(row);
+      });
+
+      container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-remove-stat') || e.target.closest('.btn-remove-stat')) {
+          const row = e.target.closest('.stat-row');
+          if (row) row.remove();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

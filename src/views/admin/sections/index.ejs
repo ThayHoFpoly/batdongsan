@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../../partials/admin-header') %>
+
+      <main class="admin-body">
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger"><%= errorMsg %></div>
+        <% } %>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Danh sách các Section trên Landing Page</h2>
+              <p style="font-size: 13px; color: var(--admin-text-muted); margin: 4px 0 0 0;">
+                Sử dụng các nút "Lên / Xuống" để sắp xếp thứ tự hiển thị, hoặc bật/tắt section theo nhu cầu.
+              </p>
+            </div>
+          </div>
+
+          <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px; text-align: center;">Thứ tự</th>
+                    <th>Tên Section</th>
+                    <th>Loại Section</th>
+                    <th>Phụ đề / Badge</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: right; width: 260px;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (sections && sections.length > 0) { %>
+                    <% sections.forEach((sec, idx) => { %>
+                      <tr>
+                        <td style="text-align: center; font-weight: 700; color: var(--admin-primary);">
+                          #<%= sec.order %>
+                        </td>
+                        <td>
+                          <strong><%= sec.title %></strong>
+                          <div style="font-size: 11px; color: var(--admin-text-muted);">Khóa: <code><%= sec.key %></code></div>
+                        </td>
+                        <td>
+                          <span class="badge badge-info"><%= sec.type %></span>
+                        </td>
+                        <td><%= sec.subtitle || '—' %></td>
+                        <td>
+                          <% if (sec.enabled) { %>
+                            <span class="badge badge-success">Đang bật</span>
+                          <% } else { %>
+                            <span class="badge badge-secondary">Đã tắt</span>
+                          <% } %>
+                        </td>
+                        <td style="text-align: right;">
+                          <div style="display: inline-flex; gap: 6px;">
+                            <!-- Move Up -->
+                            <form action="/admin/sections/<%= sec._id %>/move" method="POST" style="margin: 0;">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="direction" value="up">
+                              <button type="submit" class="btn btn-sm btn-outline" title="Di chuyển lên trên" <%= idx === 0 ? 'disabled' : '' %>>
+                                &uarr; Lên
+                              </button>
+                            </form>
+
+                            <!-- Move Down -->
+                            <form action="/admin/sections/<%= sec._id %>/move" method="POST" style="margin: 0;">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="direction" value="down">
+                              <button type="submit" class="btn btn-sm btn-outline" title="Di chuyển xuống dưới" <%= idx === sections.length - 1 ? 'disabled' : '' %>>
+                                &darr; Xuống
+                              </button>
+                            </form>
+
+                            <!-- Toggle -->
+                            <form action="/admin/sections/<%= sec._id %>/toggle" method="POST" style="margin: 0;">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <button type="submit" class="btn btn-sm <%= sec.enabled ? 'btn-outline' : 'btn-primary' %>" title="Bật/Tắt hiển thị">
+                                <%= sec.enabled ? 'Tắt' : 'Bật' %>
+                              </button>
+                            </form>
+
+                            <!-- Edit -->
+                            <a href="/admin/sections/<%= sec._id %>/edit" class="btn btn-sm btn-primary">
+                              Sửa nội dung
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="6" style="text-align: center; padding: 32px; color: var(--admin-text-muted);">
+                        Chưa có section nào được khởi tạo.
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

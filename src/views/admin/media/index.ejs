@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../../partials/admin-header') %>
+
+      <main class="admin-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--admin-primary); margin: 0;">Thư viện hình ảnh & Tệp Media (<%= pagination.total %>)</h2>
+            <p style="font-size: 13px; color: var(--admin-text-muted); margin: 2px 0 0 0;">Quản lý ảnh phối cảnh, mặt bằng căn hộ, tiện ích và banner website.</p>
+          </div>
+        </div>
+
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger" style="line-height: 1.6;"><%= errorMsg %></div>
+        <% } %>
+
+        <!-- Khối Tải Lên Media Mới -->
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h2 class="card-title">Tải lên hình ảnh mới</h2>
+          </div>
+          <div class="card-body">
+            <form action="/admin/media/upload?_csrf=<%= csrfToken %>" method="POST" enctype="multipart/form-data" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 260px;">
+                <label for="mediaFile">Chọn tệp từ máy tính <span class="required">*</span></label>
+                <input type="file" id="mediaFile" name="file" accept="image/jpeg,image/png,image/webp" class="form-control" required>
+                <div class="form-hint">
+                  Giới hạn dung lượng: <strong>Tối đa 5MB</strong> &bull; Định dạng hỗ trợ: <strong>JPG, PNG, WEBP</strong>.
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 220px;">
+                <label for="altText">Văn bản thay thế (Alt text / Mô tả)</label>
+                <input type="text" id="altText" name="altText" class="form-control" placeholder="Mô tả nội dung bức ảnh">
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="min-width: 130px; height: 42px;">
+                Tải lên ngay
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Lưới Hình Ảnh -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Danh sách tệp hình ảnh hiện có</h2>
+            <!-- Tìm kiếm -->
+            <form action="/admin/media" method="GET" style="display: flex; gap: 8px;">
+              <input type="text" name="q" class="form-control" placeholder="Tìm ảnh..." value="<%= q || '' %>" style="max-width: 200px; height: 32px; font-size: 13px;">
+              <button type="submit" class="btn btn-sm btn-outline">Tìm</button>
+            </form>
+          </div>
+          <div class="card-body">
+            <% if (mediaItems && mediaItems.length > 0) { %>
+              <div class="media-grid">
+                <% mediaItems.forEach(item => { %>
+                  <div class="media-card">
+                    <div class="media-thumb" onclick="copyToClipboard('<%= item.url %>')" title="Nhấn để sao chép URL ảnh">
+                      <img src="<%= item.url %>" alt="<%= item.altText || item.originalName %>" loading="lazy">
+                    </div>
+                    <div class="media-info">
+                      <div class="media-name" title="<%= item.originalName %>"><%= item.originalName %></div>
+                      <div class="media-size">
+                        <%= (item.size / 1024).toFixed(0) %> KB &bull; <%= item.mimeType.split('/')[1]?.toUpperCase() %>
+                      </div>
+                      <% if (item.altText) { %>
+                        <div style="font-size: 11px; color: var(--admin-text-muted); margin-top: 2px;" title="<%= item.altText %>">
+                          Alt: <em><%= item.altText.slice(0, 20) %>...</em>
+                        </div>
+                      <% } %>
+
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid var(--admin-border); padding-top: 6px;">
+                        <button type="button" class="btn btn-sm btn-outline" style="padding: 2px 6px; font-size: 11px;" onclick="copyToClipboard('<%= item.url %>')">
+                          Copy URL
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger-outline btn-delete-confirm" style="padding: 2px 6px; font-size: 11px;" data-action="/admin/media/<%= item._id %>/delete" data-item-name="<%= item.originalName %>" data-item-type="hình ảnh">
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+
+              <!-- Phân Trang -->
+              <% if (pagination.totalPages > 1) { %>
+                <div style="padding: 16px 0 0 0; margin-top: 20px; border-top: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; color: var(--admin-text-muted);">
+                    Trang <%= pagination.page %> / <%= pagination.totalPages %>
+                  </span>
+                  <div style="display: flex; gap: 6px;">
+                    <% if (pagination.page > 1) { %>
+                      <a href="/admin/media?page=<%= pagination.page - 1 %>&q=<%= q || '' %>" class="btn btn-sm btn-outline">&larr; Trước</a>
+                    <% } %>
+                    <% if (pagination.page < pagination.totalPages) { %>
+                      <a href="/admin/media?page=<%= pagination.page + 1 %>&q=<%= q || '' %>" class="btn btn-sm btn-outline">Sau &rarr;</a>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+            <% } else { %>
+              <div style="padding: 40px; text-align: center; color: var(--admin-text-muted);">
+                Chưa có hình ảnh nào trong thư viện.
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+  <script>
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Đã sao chép đường dẫn hình ảnh vào bộ nhớ tạm: ' + text);
+      }).catch(() => {
+        prompt('Đường dẫn hình ảnh:', text);
+      });
+    }
+  </script>
+</body>
+</html>
+

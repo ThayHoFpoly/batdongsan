@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../../partials/admin-header') %>
+
+      <main class="admin-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--admin-primary); margin: 0;">Danh sách bài viết (<%= pagination.total %>)</h2>
+            <p style="font-size: 13px; color: var(--admin-text-muted); margin: 2px 0 0 0;">Quản lý tin tức, tiến độ, bài viết thị trường và phân tích dự án.</p>
+          </div>
+          <a href="/admin/articles/create" class="btn btn-primary">
+            + Viết bài mới
+          </a>
+        </div>
+
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger"><%= errorMsg %></div>
+        <% } %>
+
+        <!-- Thanh Tìm Kiếm & Bộ Lọc -->
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="card-body" style="padding: 16px;">
+            <form action="/admin/articles" method="GET" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <input type="text" name="q" class="form-control" placeholder="Tìm theo tiêu đề, trích đoạn, chuyên mục..." value="<%= filters.q || '' %>" style="max-width: 380px;">
+
+              <select name="status" class="form-control" style="max-width: 180px;">
+                <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>Tất cả trạng thái</option>
+                <option value="published" <%= filters.status === 'published' ? 'selected' : '' %>>Đã xuất bản</option>
+                <option value="draft" <%= filters.status === 'draft' ? 'selected' : '' %>>Bản nháp</option>
+              </select>
+
+              <button type="submit" class="btn btn-outline">Tìm kiếm</button>
+              <% if (filters.q || (filters.status && filters.status !== 'all')) { %>
+                <a href="/admin/articles" class="btn btn-outline" style="color: var(--admin-text-muted);">Xóa lọc</a>
+              <% } %>
+            </form>
+          </div>
+        </div>
+
+        <!-- Bảng Danh Sách Bài Viết -->
+        <div class="card">
+          <div class="card-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th style="width: 70px;">Ảnh</th>
+                    <th>Tiêu đề & Chuyên mục</th>
+                    <th style="width: 140px;">Trạng thái</th>
+                    <th style="width: 140px;">Ngày đăng</th>
+                    <th style="width: 90px; text-align: center;">Lượt xem</th>
+                    <th style="text-align: right; width: 220px;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (articles && articles.length > 0) { %>
+                    <% articles.forEach(art => { %>
+                      <tr>
+                        <td>
+                          <img src="<%= art.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200&q=80' %>" alt="" style="width: 56px; height: 38px; object-fit: cover; border-radius: 4px; border: 1px solid var(--admin-border);">
+                        </td>
+                        <td>
+                          <strong><a href="/admin/articles/<%= art._id %>/edit" style="color: var(--admin-primary);"><%= art.title %></a></strong>
+                          <div style="font-size: 12px; color: var(--admin-text-muted); margin-top: 2px;">
+                            <span>Chuyên mục: <strong><%= art.category || 'Tin tức' %></strong></span> &bull; 
+                            <span>Slug: <code><%= art.slug %></code></span>
+                          </div>
+                        </td>
+                        <td>
+                          <% if (art.status === 'published') { %>
+                            <span class="badge badge-success">Đã xuất bản</span>
+                          <% } else { %>
+                            <span class="badge badge-warning">Bản nháp</span>
+                          <% } %>
+                        </td>
+                        <td style="font-size: 13px; color: var(--admin-text-muted);">
+                          <%= art.publishedAt ? new Date(art.publishedAt).toLocaleDateString('vi-VN') : 'Chưa đặt' %>
+                        </td>
+                        <td style="text-align: center; font-weight: 600;">
+                          <%= art.views || 0 %>
+                        </td>
+                        <td style="text-align: right;">
+                          <div style="display: inline-flex; gap: 6px;">
+                            <a href="/admin/articles/<%= art._id %>/preview" target="_blank" class="btn btn-sm btn-outline" title="Xem trước trang bài viết">
+                              Xem trước
+                            </a>
+                            <a href="/admin/articles/<%= art._id %>/edit" class="btn btn-sm btn-primary">
+                              Sửa
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger-outline btn-delete-confirm" data-action="/admin/articles/<%= art._id %>/delete" data-item-name="<%= art.title %>" data-item-type="bài viết" title="Xóa bài viết">
+                              Xóa
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="6" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
+                        Không tìm thấy bài viết nào phù hợp với bộ lọc.
+                      </td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Phân Trang -->
+            <% if (pagination.totalPages > 1) { %>
+              <div style="padding: 16px 20px; border-top: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span style="font-size: 13px; color: var(--admin-text-muted);">
+                  Trang <%= pagination.page %> / <%= pagination.totalPages %> (Tổng cộng <%= pagination.total %> bài)
+                </span>
+                <div style="display: flex; gap: 6px;">
+                  <% if (pagination.page > 1) { %>
+                    <a href="/admin/articles?page=<%= pagination.page - 1 %>&q=<%= filters.q || '' %>&status=<%= filters.status || 'all' %>" class="btn btn-sm btn-outline">&larr; Trang trước</a>
+                  <% } %>
+                  <% if (pagination.page < pagination.totalPages) { %>
+                    <a href="/admin/articles?page=<%= pagination.page + 1 %>&q=<%= filters.q || '' %>&status=<%= filters.status || 'all' %>" class="btn btn-sm btn-outline">Trang sau &rarr;</a>
+                  <% } %>
+                </div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

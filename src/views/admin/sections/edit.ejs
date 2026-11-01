@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../../partials/admin-header') %>
+
+      <main class="admin-body">
+        <div style="margin-bottom: 16px;">
+          <a href="/admin/sections" class="btn btn-sm btn-outline">&larr; Quay lại danh sách section</a>
+        </div>
+
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger"><%= errorMsg %></div>
+        <% } %>
+
+        <form action="/admin/sections/<%= section._id %>" method="POST" data-track-changes="true" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <!-- 1. Thuộc Tính Cơ Bản Của Section -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Cấu hình chung Section [<%= section.type %>]</h2>
+              <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+                <input type="checkbox" name="enabled" value="true" <%= section.enabled ? 'checked' : '' %> style="width: 18px; height: 18px; accent-color: var(--admin-primary);">
+                <span>Bật hiển thị trên trang chủ</span>
+              </label>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="title">Tiêu đề Section <span class="required">*</span></label>
+                  <input type="text" id="title" name="title" class="form-control" value="<%= section.title %>" required>
+                </div>
+                <div class="form-group">
+                  <label for="subtitle">Phụ đề / Badge nhãn</label>
+                  <input type="text" id="subtitle" name="subtitle" class="form-control" value="<%= section.subtitle || '' %>">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Nội Dung Chuyên Biệt Theo Loại Section -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Nội dung chi tiết (Loại: <%= section.type %>)</h2>
+            </div>
+            <div class="card-body">
+
+              <!-- HERO TYPE -->
+              <% if (section.type === 'hero') { %>
+                <% const hero = section.heroContent || {}; %>
+                <div class="form-group">
+                  <label for="headline">Tiêu đề chính Hero (Headline) <span class="required">*</span></label>
+                  <input type="text" id="headline" name="headline" class="form-control" value="<%= hero.headline || '' %>" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="subheadline">Mô tả phụ Hero (Subheadline)</label>
+                  <textarea id="subheadline" name="subheadline" class="form-control" style="min-height: 80px;"><%= hero.subheadline || '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="backgroundImage">Ảnh nền Hero lớn <span class="required">*</span></label>
+                  <div class="image-picker-group">
+                    <input type="text" id="backgroundImage" name="backgroundImage" class="form-control" value="<%= hero.backgroundImage || '' %>" placeholder="URL hình ảnh nền Hero" required>
+                    <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#backgroundImage" data-target-preview="#heroBgPreview">Chọn ảnh</button>
+                  </div>
+                  <% if (hero.backgroundImage) { %>
+                    <img id="heroBgPreview" src="<%= hero.backgroundImage %>" class="image-preview-thumb" style="width: 160px; height: 90px;" alt="Hero bg preview">
+                  <% } else { %>
+                    <img id="heroBgPreview" class="image-preview-thumb" style="width: 160px; height: 90px; display: none;" alt="Hero bg preview">
+                  <% } %>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="ctaText">Chữ nút CTA chính</label>
+                    <input type="text" id="ctaText" name="ctaText" class="form-control" value="<%= hero.ctaText || 'Nhận tư vấn' %>">
+                  </div>
+                  <div class="form-group">
+                    <label for="ctaLink">Đường dẫn CTA chính</label>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="text" id="ctaLink" name="ctaLink" class="form-control" value="<%= hero.ctaLink || '#lien-he' %>">
+                      <button type="button" class="btn btn-outline btn-test-link" data-target-input="#ctaLink">Thử</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="secondaryBtnText">Chữ nút phụ</label>
+                    <input type="text" id="secondaryBtnText" name="secondaryBtnText" class="form-control" value="<%= hero.secondaryBtnText || 'Khám phá tổng quan' %>">
+                  </div>
+                  <div class="form-group">
+                    <label for="secondaryBtnLink">Đường dẫn nút phụ</label>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="text" id="secondaryBtnLink" name="secondaryBtnLink" class="form-control" value="<%= hero.secondaryBtnLink || '#tong-quan' %>">
+                      <button type="button" class="btn btn-outline btn-test-link" data-target-input="#secondaryBtnLink">Thử</button>
+                    </div>
+                  </div>
+                </div>
+
+              <!-- OVERVIEW TYPE -->
+              <% } else if (section.type === 'overview') { %>
+                <% const ov = section.overviewContent || {}; %>
+                <div class="form-group">
+                  <label for="ovDesc">Đoạn văn mô tả tổng quan dự án <span class="required">*</span></label>
+                  <textarea id="ovDesc" name="description" class="form-control" style="min-height: 120px;" required><%= ov.description || '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="masterPlanImage">Hình ảnh phối cảnh / Mặt bằng tổng thể</label>
+                  <div class="image-picker-group">
+                    <input type="text" id="masterPlanImage" name="masterPlanImage" class="form-control" value="<%= ov.masterPlanImage || '' %>">
+                    <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#masterPlanImage" data-target-preview="#ovMasterPreview">Chọn ảnh</button>
+                  </div>
+                  <% if (ov.masterPlanImage) { %>
+                    <img id="ovMasterPreview" src="<%= ov.masterPlanImage %>" class="image-preview-thumb" style="width: 160px; height: 90px;" alt="Master plan preview">
+                  <% } else { %>
+                    <img id="ovMasterPreview" class="image-preview-thumb" style="width: 160px; height: 90px; display: none;" alt="Master plan preview">
+                  <% } %>
+                </div>
+
+              <!-- LOCATION TYPE -->
+              <% } else if (section.type === 'location') { %>
+                <% const loc = section.locationContent || {}; %>
+                <div class="form-group">
+                  <label for="locDesc">Mô tả vị trí & kết nối <span class="required">*</span></label>
+                  <textarea id="locDesc" name="description" class="form-control" style="min-height: 100px;" required><%= loc.description || '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="locAddress">Địa chỉ vị trí hiển thị</label>
+                  <input type="text" id="locAddress" name="address" class="form-control" value="<%= loc.address || '' %>">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="mapEmbedUrl">Đường dẫn Google Maps Embed (nếu có)</label>
+                    <input type="text" id="mapEmbedUrl" name="mapEmbedUrl" class="form-control" value="<%= loc.mapEmbedUrl || '' %>" placeholder="https://www.google.com/maps/embed?...">
+                  </div>
+                  <div class="form-group">
+                    <label for="mapImageUrl">Hình ảnh sơ đồ vị trí (dự phòng)</label>
+                    <div class="image-picker-group">
+                      <input type="text" id="mapImageUrl" name="mapImageUrl" class="form-control" value="<%= loc.mapImageUrl || '' %>">
+                      <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#mapImageUrl" data-target-preview="#mapImgPreview">Chọn ảnh</button>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 style="font-size: 14px; font-weight: 700; margin: 20px 0 10px;">Các mốc liên kết vùng:</h3>
+                <div id="locationHighlightsContainer">
+                  <% if (loc.highlights && loc.highlights.length > 0) { %>
+                    <% loc.highlights.forEach((hl, i) => { %>
+                      <div class="form-row" style="background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 10px;">
+                        <div class="form-group" style="margin: 0;">
+                          <label style="font-size: 12px;">Điểm đến</label>
+                          <input type="text" name="destTitles" class="form-control" value="<%= hl.destination %>" required>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                          <label style="font-size: 12px;">Thời gian di chuyển</label>
+                          <input type="text" name="destMinutes" class="form-control" value="<%= hl.minutes %>" placeholder="VD: 5 phút" required>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                          <label style="font-size: 12px;">Khoảng cách (km)</label>
+                          <input type="text" name="destDistances" class="form-control" value="<%= hl.distanceKm || '' %>" placeholder="VD: 2.5 km">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                          <label style="font-size: 12px;">Ghi chú</label>
+                          <input type="text" name="destNotes" class="form-control" value="<%= hl.note || '' %>" placeholder="VD: Trục Mai Chí Thọ">
+                        </div>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                </div>
+
+              <!-- AMENITIES TYPE -->
+              <% } else if (section.type === 'amenities') { %>
+                <% const am = section.amenitiesContent || {}; %>
+                <div class="form-group">
+                  <label for="amDesc">Mô tả tổng quát tiện ích</label>
+                  <textarea id="amDesc" name="description" class="form-control" style="min-height: 80px;"><%= am.description || '' %></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px;">
+                  <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Danh sách tiện ích nội khu (<%= (am.items || []).length %>):</h3>
+                  <button type="button" class="btn btn-sm btn-outline" id="btnAddAmenityRow">+ Thêm tiện ích</button>
+                </div>
+
+                <div id="amenitiesListContainer">
+                  <% if (am.items && am.items.length > 0) { %>
+                    <% am.items.forEach((item, i) => { %>
+                      <div class="form-row amenity-item-row" style="background: #F8FAFC; padding: 14px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 12px; position: relative;">
+                        <div class="form-group" style="margin-bottom: 8px;">
+                          <label style="font-size: 12px;">Tên tiện ích</label>
+                          <input type="text" name="amenityTitles" class="form-control" value="<%= item.title %>" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 8px;">
+                          <label style="font-size: 12px;">Phân loại</label>
+                          <input type="text" name="amenityCategories" class="form-control" value="<%= item.category || 'Nghỉ dưỡng' %>">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+                          <label style="font-size: 12px;">Mô tả tiện ích</label>
+                          <input type="text" name="amenityDescs" class="form-control" value="<%= item.description %>" required>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                          <label style="font-size: 12px;">URL hình ảnh tiện ích</label>
+                          <div class="image-picker-group">
+                            <input type="text" id="amenityImg_<%= i %>" name="amenityImages" class="form-control" value="<%= item.imageUrl || '' %>">
+                            <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#amenityImg_<%= i %>" data-target-preview="#amenityPreview_<%= i %>">Chọn ảnh</button>
+                          </div>
+                          <% if (item.imageUrl) { %>
+                            <img id="amenityPreview_<%= i %>" src="<%= item.imageUrl %>" class="image-preview-thumb" alt="Amenity preview">
+                          <% } else { %>
+                            <img id="amenityPreview_<%= i %>" class="image-preview-thumb" style="display: none;" alt="Amenity preview">
+                          <% } %>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger-outline btn-remove-row" style="position: absolute; top: 10px; right: 10px;" title="Xóa tiện ích này">&times;</button>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                </div>
+
+              <!-- FLOOR PLANS TYPE -->
+              <% } else if (section.type === 'floorPlans') { %>
+                <% const fp = section.floorPlansContent || {}; %>
+                <div class="form-group">
+                  <label for="fpDesc">Mô tả tổng quát mặt bằng & thiết kế</label>
+                  <textarea id="fpDesc" name="description" class="form-control" style="min-height: 80px;"><%= fp.description || '' %></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px;">
+                  <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Danh sách căn hộ & mặt bằng (<%= (fp.items || []).length %>):</h3>
+                  <button type="button" class="btn btn-sm btn-outline" id="btnAddPlanRow">+ Thêm loại căn hộ</button>
+                </div>
+
+                <div id="plansListContainer">
+                  <% if (fp.items && fp.items.length > 0) { %>
+                    <% fp.items.forEach((plan, i) => { %>
+                      <div class="plan-item-row" style="background: #F8FAFC; padding: 14px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 12px; position: relative;">
+                        <div class="form-row">
+                          <div class="form-group">
+                            <label style="font-size: 12px;">Tên sản phẩm</label>
+                            <input type="text" name="planNames" class="form-control" value="<%= plan.name %>" required>
+                          </div>
+                          <div class="form-group">
+                            <label style="font-size: 12px;">Mã căn</label>
+                            <input type="text" name="planCodes" class="form-control" value="<%= plan.code || '' %>">
+                          </div>
+                        </div>
+
+                        <div class="form-row">
+                          <div class="form-group">
+                            <label style="font-size: 12px;">Phòng ngủ</label>
+                            <input type="text" name="planBeds" class="form-control" value="<%= plan.bedrooms %>" required>
+                          </div>
+                          <div class="form-group">
+                            <label style="font-size: 12px;">Vệ sinh</label>
+                            <input type="text" name="planBaths" class="form-control" value="<%= plan.bathrooms %>" required>
+                          </div>
+                          <div class="form-group">
+                            <label style="font-size: 12px;">Diện tích</label>
+                            <input type="text" name="planAreas" class="form-control" value="<%= plan.area %>" required>
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label style="font-size: 12px;">Đặc điểm nổi bật (mỗi dòng một ý)</label>
+                          <textarea name="planFeatures" class="form-control" style="min-height: 60px;"><%= (plan.features || []).join('\n') %></textarea>
+                        </div>
+
+                        <div class="form-group">
+                          <label style="font-size: 12px;">URL hình ảnh phối cảnh / mặt bằng căn hộ</label>
+                          <div class="image-picker-group">
+                            <input type="text" id="planImg_<%= i %>" name="planImages" class="form-control" value="<%= plan.imageUrl %>" required>
+                            <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#planImg_<%= i %>" data-target-preview="#planPreview_<%= i %>">Chọn ảnh</button>
+                          </div>
+                          <% if (plan.imageUrl) { %>
+                            <img id="planPreview_<%= i %>" src="<%= plan.imageUrl %>" class="image-preview-thumb" alt="Plan preview">
+                          <% } else { %>
+                            <img id="planPreview_<%= i %>" class="image-preview-thumb" style="display: none;" alt="Plan preview">
+                          <% } %>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger-outline btn-remove-row" style="position: absolute; top: 10px; right: 10px;" title="Xóa loại căn hộ này">&times;</button>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                </div>
+
+              <!-- GALLERY TYPE -->
+              <% } else if (section.type === 'gallery') { %>
+                <% const gal = section.galleryContent || {}; %>
+                <div class="form-group">
+                  <label for="galDesc">Mô tả thư viện ảnh</label>
+                  <textarea id="galDesc" name="description" class="form-control" style="min-height: 80px;"><%= gal.description || '' %></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px;">
+                  <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Danh sách hình ảnh phối cảnh (<%= (gal.items || []).length %>):</h3>
+                  <button type="button" class="btn btn-sm btn-outline" id="btnAddGalleryRow">+ Thêm ảnh</button>
+                </div>
+
+                <div id="galleryListContainer">
+                  <% if (gal.items && gal.items.length > 0) { %>
+                    <% gal.items.forEach((item, i) => { %>
+                      <div class="gallery-item-row" style="background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 10px; position: relative;">
+                        <div class="form-row">
+                          <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 12px;">Tiêu đề ảnh</label>
+                            <input type="text" name="galleryTitles" class="form-control" value="<%= item.title %>" required>
+                          </div>
+                          <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 12px;">Chuyên mục ảnh</label>
+                            <input type="text" name="galleryCategories" class="form-control" value="<%= item.category || 'Kiến trúc' %>">
+                          </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px; margin-bottom: 0;">
+                          <label style="font-size: 12px;">URL hình ảnh</label>
+                          <div class="image-picker-group">
+                            <input type="text" id="galleryImg_<%= i %>" name="galleryImages" class="form-control" value="<%= item.imageUrl %>" required>
+                            <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#galleryImg_<%= i %>" data-target-preview="#galleryPreview_<%= i %>">Chọn ảnh</button>
+                          </div>
+                          <% if (item.imageUrl) { %>
+                            <img id="galleryPreview_<%= i %>" src="<%= item.imageUrl %>" class="image-preview-thumb" alt="Gallery preview">
+                          <% } else { %>
+                            <img id="galleryPreview_<%= i %>" class="image-preview-thumb" style="display: none;" alt="Gallery preview">
+                          <% } %>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger-outline btn-remove-row" style="position: absolute; top: 10px; right: 10px;" title="Xóa ảnh này">&times;</button>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                </div>
+
+              <!-- NEWS TYPE -->
+              <% } else if (section.type === 'news') { %>
+                <% const news = section.newsContent || {}; %>
+                <div class="form-group">
+                  <label for="newsDesc">Mô tả section tin tức</label>
+                  <textarea id="newsDesc" name="description" class="form-control" style="min-height: 80px;"><%= news.description || '' %></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="displayCount">Số lượng bài viết hiển thị trên trang chủ</label>
+                  <input type="number" id="displayCount" name="displayCount" class="form-control" value="<%= news.displayCount || 6 %>" min="1" max="24" style="max-width: 200px;">
+                  <div class="form-hint">Bài viết được lấy tự động từ danh sách các bài viết đã xuất bản.</div>
+                </div>
+
+              <!-- CONTACT TYPE -->
+              <% } else if (section.type === 'contact') { %>
+                <% const con = section.contactContent || {}; %>
+                <div class="form-group">
+                  <label for="conDesc">Mô tả kêu gọi tư vấn</label>
+                  <textarea id="conDesc" name="description" class="form-control" style="min-height: 80px;"><%= con.description || '' %></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="conNote">Ghi chú cam kết bảo mật dưới nút gửi</label>
+                  <input type="text" id="conNote" name="note" class="form-control" value="<%= con.note || 'Thông tin của Quý khách được cam kết bảo mật tuyệt đối.' %>">
+                </div>
+              <% } %>
+
+            </div>
+          </div>
+
+          <!-- Bottom Action Bar -->
+          <div style="position: sticky; bottom: 16px; z-index: 50; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--admin-border); display: flex; justify-content: flex-end; gap: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <a href="/admin/sections" class="btn btn-outline">Hủy bỏ</a>
+            <button type="submit" class="btn btn-primary" style="min-width: 160px;">
+              Lưu thay đổi Section
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+  <script>
+    // Generic row remover for dynamic builders
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn-remove-row') || e.target.closest('.btn-remove-row')) {
+        const row = e.target.closest('.amenity-item-row, .plan-item-row, .gallery-item-row');
+        if (row) row.remove();
+      }
+    });
+
+    // Add Amenity Item
+    const addAmenityBtn = document.getElementById('btnAddAmenityRow');
+    const amenityContainer = document.getElementById('amenitiesListContainer');
+    if (addAmenityBtn && amenityContainer) {
+      addAmenityBtn.addEventListener('click', () => {
+        const idx = Date.now();
+        const div = document.createElement('div');
+        div.className = 'form-row amenity-item-row';
+        div.style = 'background: #F8FAFC; padding: 14px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 12px; position: relative;';
+        div.innerHTML = `
+          <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-size: 12px;">Tên tiện ích</label>
+            <input type="text" name="amenityTitles" class="form-control" placeholder="Tên tiện ích mới" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-size: 12px;">Phân loại</label>
+            <input type="text" name="amenityCategories" class="form-control" value="Nghỉ dưỡng">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+            <label style="font-size: 12px;">Mô tả tiện ích</label>
+            <input type="text" name="amenityDescs" class="form-control" placeholder="Mô tả công năng" required>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+            <label style="font-size: 12px;">URL hình ảnh tiện ích</label>
+            <div class="image-picker-group">
+              <input type="text" id="amenityImg_${idx}" name="amenityImages" class="form-control" placeholder="URL hình ảnh">
+              <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#amenityImg_${idx}" data-target-preview="#amenityPreview_${idx}">Chọn ảnh</button>
+            </div>
+            <img id="amenityPreview_${idx}" class="image-preview-thumb" style="display: none;" alt="Amenity preview">
+          </div>
+          <button type="button" class="btn btn-sm btn-danger-outline btn-remove-row" style="position: absolute; top: 10px; right: 10px;">&times;</button>
+        `;
+        amenityContainer.appendChild(div);
+      });
+    }
+
+    // Add Plan Item
+    const addPlanBtn = document.getElementById('btnAddPlanRow');
+    const planContainer = document.getElementById('plansListContainer');
+    if (addPlanBtn && planContainer) {
+      addPlanBtn.addEventListener('click', () => {
+        const idx = Date.now();
+        const div = document.createElement('div');
+        div.className = 'plan-item-row';
+        div.style = 'background: #F8FAFC; padding: 14px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 12px; position: relative;';
+        div.innerHTML = `
+          <div class="form-row">
+            <div class="form-group">
+              <label style="font-size: 12px;">Tên sản phẩm</label>
+              <input type="text" name="planNames" class="form-control" placeholder="VD: Căn hộ 2PN Deluxe" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px;">Mã căn</label>
+              <input type="text" name="planCodes" class="form-control" placeholder="VD: 2BR-A">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label style="font-size: 12px;">Phòng ngủ</label>
+              <input type="text" name="planBeds" class="form-control" value="2 PN" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px;">Vệ sinh</label>
+              <input type="text" name="planBaths" class="form-control" value="2 WC" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px;">Diện tích</label>
+              <input type="text" name="planAreas" class="form-control" value="75 m²" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 12px;">Đặc điểm nổi bật (mỗi dòng một ý)</label>
+            <textarea name="planFeatures" class="form-control" style="min-height: 60px;" placeholder="Ban công view sông&#10;Nội thất nhập khẩu"></textarea>
+          </div>
+          <div class="form-group">
+            <label style="font-size: 12px;">URL hình ảnh mặt bằng căn hộ</label>
+            <div class="image-picker-group">
+              <input type="text" id="planImg_${idx}" name="planImages" class="form-control" placeholder="URL ảnh mặt bằng" required>
+              <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#planImg_${idx}" data-target-preview="#planPreview_${idx}">Chọn ảnh</button>
+            </div>
+            <img id="planPreview_${idx}" class="image-preview-thumb" style="display: none;" alt="Plan preview">
+          </div>
+          <button type="button" class="btn btn-sm btn-danger-outline btn-remove-row" style="position: absolute; top: 10px; right: 10px;">&times;</button>
+        `;
+        planContainer.appendChild(div);
+      });
+    }
+
+    // Add Gallery Item
+    const addGalBtn = document.getElementById('btnAddGalleryRow');
+    const galContainer = document.getElementById('galleryListContainer');
+    if (addGalBtn && galContainer) {
+      addGalBtn.addEventListener('click', () => {
+        const idx = Date.now();
+        const div = document.createElement('div');
+        div.className = 'gallery-item-row';
+        div.style = 'background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border); margin-bottom: 10px; position: relative;';
+        div.innerHTML = `
+          <div class="form-row">
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 12px;">Tiêu đề ảnh</label>
+              <input type="text" name="galleryTitles" class="form-control" placeholder="VD: Phối cảnh hồ bơi" required>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label style="font-size: 12px;">Chuyên mục ảnh</label>
+              <input type="text" name="galleryCategories" class="form-control" value="Kiến trúc">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top: 8px; margin-bottom: 0;">
+            <label style="font-size: 12px;">URL hình ảnh</label>
+            <div class="image-picker-group">
+              <input type="text" id="galleryImg_${idx}" name="galleryImages" class="form-control" placeholder="URL hình ảnh" required>
+              <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#galleryImg_${idx}" data-target-preview="#galleryPreview_${idx}">Chọn ảnh</button>
+            </div>
+            <img id="galleryPreview_${idx}" class="image-preview-thumb" style="display: none;" alt="Gallery preview">
+          </div>
+          <button type="button" class="btn btn-sm btn-danger-outline btn-remove-row" style="position: absolute; top: 10px; right: 10px;">&times;</button>
+        `;
+        galContainer.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
+

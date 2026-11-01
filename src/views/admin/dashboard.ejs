@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../partials/admin-header') %>
+
+      <main class="admin-body">
+        <!-- 1. Hàng Thống Kê Số Liệu Thật -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--admin-danger-light); color: var(--admin-danger);">
+              📥
+            </div>
+            <div>
+              <div class="stat-num"><%= stats.newLeadsCount %></div>
+              <div class="stat-title">Khách mới cần tư vấn (Tổng: <%= stats.totalLeadsCount %>)</div>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--admin-success-light); color: var(--admin-success);">
+              📰
+            </div>
+            <div>
+              <div class="stat-num"><%= stats.publishedArticlesCount %></div>
+              <div class="stat-title">Bài viết đã xuất bản</div>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--admin-warning-light); color: var(--admin-warning);">
+              📝
+            </div>
+            <div>
+              <div class="stat-num"><%= stats.draftArticlesCount %></div>
+              <div class="stat-title">Bài viết bản nháp</div>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--admin-info-light); color: var(--admin-info);">
+              📑
+            </div>
+            <div>
+              <div class="stat-num"><%= stats.activeSectionsCount %></div>
+              <div class="stat-title">Section đang bật trên Trang chủ</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Thao Tác Nhanh -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Tác vụ nhanh</h2>
+          </div>
+          <div class="card-body" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="/admin/articles/create" class="btn btn-primary">
+              <span>+ Viết bài mới</span>
+            </a>
+            <a href="/admin/leads?status=new" class="btn btn-outline">
+              <span>Xem khách hàng mới (<%= stats.newLeadsCount %>)</span>
+            </a>
+            <a href="/admin/sections" class="btn btn-outline">
+              <span>Quản lý Section Trang chủ</span>
+            </a>
+            <a href="/admin/settings" class="btn btn-outline">
+              <span>Cài đặt thông tin dự án</span>
+            </a>
+            <a href="/admin/media" class="btn btn-outline">
+              <span>Thư viện hình ảnh (<%= stats.mediaCount %>)</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. Yêu Cầu Tư Vấn Gần Đây -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Khách hàng đăng ký tư vấn gần nhất</h2>
+            <a href="/admin/leads" class="btn btn-sm btn-outline">Xem toàn bộ &rarr;</a>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <% if (recentLeads && recentLeads.length > 0) { %>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Họ và tên</th>
+                      <th>Số điện thoại</th>
+                      <th>Nhu cầu</th>
+                      <th>Thời gian gửi</th>
+                      <th>Trạng thái</th>
+                      <th>Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recentLeads.forEach(lead => { %>
+                      <tr>
+                        <td><strong><%= lead.fullName %></strong></td>
+                        <td>
+                          <a href="tel:<%= lead.phone %>" style="font-weight: 600; color: var(--admin-primary);">
+                            <%= lead.phone %>
+                          </a>
+                        </td>
+                        <td><%= lead.interest || 'Chung' %></td>
+                        <td style="color: var(--admin-text-muted); font-size: 13px;">
+                          <%= new Date(lead.createdAt).toLocaleString('vi-VN') %>
+                        </td>
+                        <td>
+                          <% if (lead.status === 'new') { %>
+                            <span class="badge badge-danger">Mới</span>
+                          <% } else if (lead.status === 'contacted') { %>
+                            <span class="badge badge-warning">Đã liên hệ</span>
+                          <% } else { %>
+                            <span class="badge badge-success">Đã hoàn thành</span>
+                          <% } %>
+                        </td>
+                        <td>
+                          <a href="/admin/leads?detail=<%= lead._id %>" class="btn btn-sm btn-outline">
+                            Chi tiết
+                          </a>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div style="padding: 32px; text-align: center; color: var(--admin-text-muted);">
+                Chưa có yêu cầu tư vấn nào từ khách hàng.
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

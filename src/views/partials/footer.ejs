@@ -1,0 +1,85 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <!-- Cột 1: Thông tin thương hiệu -->
+      <div class="footer-brand">
+        <h3><%= siteSettings.projectName %></h3>
+        <p><%= siteSettings.tagline %></p>
+        <% if (siteSettings.developer) { %>
+          <p style="font-size: 0.85rem; color: rgba(247, 245, 240, 0.6); margin-top: 8px;">
+            <strong>Đơn vị phát triển:</strong> <%= siteSettings.developer %>
+          </p>
+        <% } %>
+      </div>
+
+      <!-- Cột 2: Điều hướng nhanh -->
+      <div class="footer-col">
+        <h4>Liên kết nhanh</h4>
+        <ul class="footer-links">
+          <% if (siteSettings.footer && siteSettings.footer.links && siteSettings.footer.links.length > 0) { %>
+            <% siteSettings.footer.links.forEach(l => { %>
+              <li><a href="<%= l.url %>"><%= l.label %></a></li>
+            <% }) %>
+          <% } else { %>
+            <li><a href="/#tong-quan">Tổng quan dự án</a></li>
+            <li><a href="/#vi-tri">Vị trí & Kết nối</a></li>
+            <li><a href="/#tien-ich">Hệ thống tiện ích</a></li>
+            <li><a href="/#mat-bang">Mặt bằng căn hộ</a></li>
+            <li><a href="/#thu-vien">Thư viện hình ảnh</a></li>
+            <li><a href="/#tin-tuc">Tin tức & Sự kiện</a></li>
+            <li><a href="/#lien-he">Liên hệ tư vấn</a></li>
+          <% } %>
+        </ul>
+      </div>
+
+      <!-- Cột 3: Liên hệ hỗ trợ -->
+      <div class="footer-col">
+        <h4>Thông tin liên hệ</h4>
+        <ul class="footer-links">
+          <% if (siteSettings.address) { %>
+            <li style="color: rgba(247, 245, 240, 0.8); font-size: 0.9rem;">
+              <strong>Địa chỉ:</strong> <%= siteSettings.address %>
+            </li>
+          <% } %>
+          <% if (salesContact && salesContact.phone) { %>
+            <li>
+              <strong>Hotline:</strong>
+              <a href="tel:<%= salesContact.phone.replace(/\s+/g, '') %>"><%= salesContact.phone %></a>
+            </li>
+          <% } %>
+          <% if (salesContact && salesContact.email) { %>
+            <li>
+              <strong>Email:</strong>
+              <a href="mailto:<%= salesContact.email %>"><%= salesContact.email %></a>
+            </li>
+          <% } %>
+          <% if (salesContact && salesContact.zaloUrl) { %>
+            <li>
+              <strong>Zalo:</strong>
+              <a href="<%= salesContact.zaloUrl %>" target="_blank" rel="noopener noreferrer">Nhắn tin Zalo tư vấn</a>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Khối lưu ý minh họa -->
+    <div class="footer-disclaimer-box">
+      <p>
+        <%= siteSettings.footer?.disclaimerText || 'Lưu ý: Tất cả hình ảnh, thông số kỹ thuật, quy mô và thông tin trên website này chỉ mang tính chất minh họa tham khảo cho giao diện phần mềm, không phải là cam kết pháp lý hay chào bán chính thức.' %>
+      </p>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div>
+        <%= siteSettings.footer?.copyrightText || 'Bản quyền © 2026 The Horizon Riverside.' %>
+      </div>
+      <div>
+        <a href="/admin/login" style="color: rgba(247, 245, 240, 0.6); font-size: 0.8rem; text-decoration: underline;">
+          Khu vực Quản trị CMS
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

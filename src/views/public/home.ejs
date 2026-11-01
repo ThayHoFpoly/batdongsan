@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= siteSettings.seo?.title || (siteSettings.projectName + ' - ' + siteSettings.tagline) %></title>
+  <meta name="description" content="<%= siteSettings.seo?.description || siteSettings.shortDescription %>">
+  <link rel="canonical" href="<%= appUrl %>/">
+  
+  <!-- CSRF Protection Token -->
+  <meta name="csrf-token" content="<%= csrfToken %>">
+
+  <!-- OpenGraph Metadata -->
+  <meta property="og:title" content="<%= siteSettings.seo?.title || siteSettings.projectName %>">
+  <meta property="og:description" content="<%= siteSettings.seo?.description || siteSettings.shortDescription %>">
+  <meta property="og:image" content="<%= siteSettings.seo?.ogImage || (sectionMap.hero && sectionMap.hero.heroContent ? sectionMap.hero.heroContent.backgroundImage : '') %>">
+  <meta property="og:url" content="<%= appUrl %>/">
+  <meta property="og:type" content="website">
+
+  <!-- Structured Data: Schema.org (ApartmentComplex) with real data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ApartmentComplex",
+    "name": "<%= siteSettings.projectName.replace(/"/g, '\\"') %>",
+    "description": "<%= (siteSettings.shortDescription || '').replace(/"/g, '\\"') %>",
+    "url": "<%= appUrl %>",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "<%= (siteSettings.address || '').replace(/"/g, '\\"') %>",
+      "addressCountry": "VN"
+    }<% if (salesContact && salesContact.phone) { %>,
+    "telephone": "<%= salesContact.phone %>"
+    <% } %>
+  }
+  </script>
+
+  <!-- Typography: Playfair Display & Be Vietnam Pro with full Vietnamese diacritics -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <!-- 1. Header & Navigation -->
+  <%- include('../partials/header') %>
+
+  <main id="mainContent">
+
+    <!-- 2. Hero Section -->
+    <% if (isAvailable.hero && sectionMap.hero) { %>
+      <% const hero = sectionMap.hero.heroContent; %>
+      <section class="hero-section" id="hero">
+        <div class="hero-bg-media">
+          <img src="<%= hero.backgroundImage %>" alt="<%= siteSettings.projectName %>" fetchpriority="high">
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="container">
+          <div class="hero-content">
+            <% if (sectionMap.hero.subtitle) { %>
+              <div class="hero-badge"><%= sectionMap.hero.subtitle %></div>
+            <% } %>
+            <h1 class="hero-title"><%= hero.headline %></h1>
+            <% if (hero.subheadline) { %>
+              <p class="hero-subtitle"><%= hero.subheadline %></p>
+            <% } %>
+            <div class="hero-cta-group">
+              <a href="<%= hero.ctaLink || '#lien-he' %>" class="btn btn-accent"><%= hero.ctaText || 'Nhận tư vấn' %></a>
+              <a href="<%= hero.secondaryBtnLink || '#tong-quan' %>" class="btn btn-white"><%= hero.secondaryBtnText || 'Khám phá tổng quan' %></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 3. Tổng quan Section -->
+    <% if (isAvailable.overview && sectionMap.overview) { %>
+      <% const overview = sectionMap.overview.overviewContent; %>
+      <section class="section" id="tong-quan">
+        <div class="container">
+          <div class="overview-grid">
+            <div>
+              <span class="section-badge"><%= sectionMap.overview.subtitle || 'Tổng quan' %></span>
+              <h2 class="section-title"><%= sectionMap.overview.title %></h2>
+              <p class="section-description">
+                <%= overview.description %>
+              </p>
+
+              <!-- Các chỉ số dự án (chỉ hiển thị khi có dữ liệu) -->
+              <% if (overview.stats && overview.stats.length > 0) { %>
+                <div class="stats-grid">
+                  <% overview.stats.forEach(stat => { %>
+                    <div class="stat-card">
+                      <div class="stat-value"><%= stat.value %></div>
+                      <div class="stat-label"><%= stat.label %></div>
+                      <% if (stat.subtext) { %>
+                        <div class="stat-subtext"><%= stat.subtext %></div>
+                      <% } %>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Phối cảnh tổng thể -->
+            <% if (overview.masterPlanImage) { %>
+              <div class="overview-media">
+                <img src="<%= overview.masterPlanImage %>" alt="Phối cảnh tổng quan <%= siteSettings.projectName %>" loading="lazy">
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 4. Vị trí & Kết nối Section -->
+    <% if (isAvailable.location && sectionMap.location) { %>
+      <% const loc = sectionMap.location.locationContent; %>
+      <section class="section" id="vi-tri">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge"><%= sectionMap.location.subtitle || 'Vị trí & Kết nối' %></span>
+            <h2 class="section-title"><%= sectionMap.location.title %></h2>
+            <p class="section-description"><%= loc.description %></p>
+          </div>
+
+          <div class="location-grid">
+            <div>
+              <% if (loc.address || siteSettings.address) { %>
+                <div class="address-box">
+                  <div class="address-title">Địa chỉ dự án</div>
+                  <p class="address-text"><%= loc.address || siteSettings.address %></p>
+                </div>
+              <% } %>
+
+              <!-- Danh sách kết nối vùng -->
+              <% if (loc.highlights && loc.highlights.length > 0) { %>
+                <div class="connectivity-list">
+                  <% loc.highlights.forEach(item => { %>
+                    <div class="connectivity-item">
+                      <div>
+                        <div class="connectivity-dest"><%= item.destination %></div>
+                        <% if (item.note || item.distanceKm) { %>
+                          <div class="connectivity-note">
+                            <%= item.distanceKm ? item.distanceKm + ' • ' : '' %><%= item.note %>
+                          </div>
+                        <% } %>
+                      </div>
+                      <div class="connectivity-time"><%= item.minutes %></div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Bản đồ -->
+            <div class="map-wrapper">
+              <% if (loc.mapEmbedUrl && loc.mapEmbedUrl.trim().length > 0) { %>
+                <iframe src="<%= loc.mapEmbedUrl %>" title="Bản đồ vị trí <%= siteSettings.projectName %>" loading="lazy" allowfullscreen></iframe>
+              <% } else if (loc.mapImageUrl) { %>
+                <img src="<%= loc.mapImageUrl %>" alt="Sơ đồ vị trí kết nối <%= siteSettings.projectName %>" class="map-placeholder-img" loading="lazy">
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 5. Hệ thống tiện ích Section -->
+    <% if (isAvailable.amenities && sectionMap.amenities) { %>
+      <% const amen = sectionMap.amenities.amenitiesContent; %>
+      <section class="section" id="tien-ich">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge"><%= sectionMap.amenities.subtitle || 'Hệ sinh thái tiện ích' %></span>
+            <h2 class="section-title"><%= sectionMap.amenities.title %></h2>
+            <% if (amen.description) { %>
+              <p class="section-description"><%= amen.description %></p>
+            <% } %>
+          </div>
+
+          <div class="amenities-grid">
+            <% amen.items.forEach(amenity => { %>
+              <div class="amenity-card">
+                <div class="amenity-media">
+                  <% if (amenity.imageUrl) { %>
+                    <img src="<%= amenity.imageUrl %>" alt="<%= amenity.title %>" loading="lazy">
+                  <% } %>
+                  <% if (amenity.category) { %>
+                    <span class="amenity-tag"><%= amenity.category %></span>
+                  <% } %>
+                </div>
+                <div class="amenity-body">
+                  <h3 class="amenity-title"><%= amenity.title %></h3>
+                  <p class="amenity-desc"><%= amenity.description %></p>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 6. Mặt bằng & Loại sản phẩm Section -->
+    <% if (isAvailable.floorPlans && sectionMap.floorPlans) { %>
+      <% const fp = sectionMap.floorPlans.floorPlansContent; %>
+      <section class="section" id="mat-bang">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge"><%= sectionMap.floorPlans.subtitle || 'Mặt bằng & Sản phẩm' %></span>
+            <h2 class="section-title"><%= sectionMap.floorPlans.title %></h2>
+            <% if (fp.description) { %>
+              <p class="section-description"><%= fp.description %></p>
+            <% } %>
+          </div>
+
+          <div class="plans-grid">
+            <% fp.items.forEach(plan => { %>
+              <div class="plan-card">
+                <div class="plan-media">
+                  <img src="<%= plan.imageUrl %>" alt="<%= plan.name %>" loading="lazy">
+                </div>
+                <div class="plan-content">
+                  <div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 4px;"><%= plan.name %></h3>
+                    <div class="plan-specs">
+                      <span class="plan-spec-badge"><%= plan.area %></span>
+                      <span class="plan-spec-badge"><%= plan.bedrooms %></span>
+                      <span class="plan-spec-badge"><%= plan.bathrooms %></span>
+                    </div>
+                    <% if (plan.description) { %>
+                      <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 12px;"><%= plan.description %></p>
+                    <% } %>
+                    <% if (plan.features && plan.features.length > 0) { %>
+                      <ul class="plan-features">
+                        <% plan.features.forEach(f => { %>
+                          <li><%= f %></li>
+                        <% }) %>
+                      </ul>
+                    <% } %>
+                  </div>
+                  <a href="#lien-he" class="btn btn-outline" style="width: 100%;">
+                    Nhận sơ đồ & thông số
+                  </a>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 7. Thư viện hình ảnh Section -->
+    <% if (isAvailable.gallery && sectionMap.gallery) { %>
+      <% const gal = sectionMap.gallery.galleryContent; %>
+      <section class="section" id="thu-vien">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge"><%= sectionMap.gallery.subtitle || 'Thư viện ảnh' %></span>
+            <h2 class="section-title"><%= sectionMap.gallery.title %></h2>
+            <% if (gal.description) { %>
+              <p class="section-description"><%= gal.description %></p>
+            <% } %>
+          </div>
+
+          <div class="gallery-grid">
+            <% gal.items.forEach(item => { %>
+              <div class="gallery-item">
+                <img src="<%= item.imageUrl %>" alt="<%= item.title %>" loading="lazy">
+                <div class="gallery-caption"><%= item.title %></div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 8. Tin tức & Sự kiện Section -->
+    <% if (isAvailable.news && sectionMap.news) { %>
+      <% const news = sectionMap.news.newsContent; %>
+      <section class="section" id="tin-tuc">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge"><%= sectionMap.news.subtitle || 'Tin tức' %></span>
+            <h2 class="section-title"><%= sectionMap.news.title %></h2>
+            <% if (news && news.description) { %>
+              <p class="section-description"><%= news.description %></p>
+            <% } %>
+          </div>
+
+          <div class="articles-grid" id="articlesGrid">
+            <% articles.forEach(article => { %>
+              <article class="article-card">
+                <div class="article-thumbnail">
+                  <img src="<%= article.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' %>" alt="<%= article.title %>" loading="lazy">
+                </div>
+                <div class="article-card-body">
+                  <div>
+                    <div class="article-meta">
+                      <span class="article-category"><%= article.category || 'Tin tức' %></span>
+                      <span>&bull;</span>
+                      <time datetime="<%= article.publishedAt.toISOString() %>">
+                        <%= new Date(article.publishedAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                      </time>
+                    </div>
+                    <h3 class="article-card-title">
+                      <a href="/bai-viet/<%= article.slug %>"><%= article.title %></a>
+                    </h3>
+                    <p class="article-excerpt"><%= article.excerpt %></p>
+                  </div>
+                  <a href="/bai-viet/<%= article.slug %>" class="article-read-more">
+                    Đọc chi tiết &rarr;
+                  </a>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+
+          <!-- Nút Tải thêm bài viết khi số lượng bài lớn -->
+          <% if (totalArticles > articles.length) { %>
+            <div class="load-more-container">
+              <button type="button" class="btn btn-outline" id="btnLoadMoreArticles">
+                Xem thêm bài viết khác
+              </button>
+            </div>
+          <% } %>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- 9. Liên hệ tư vấn Section -->
+    <% if (isAvailable.contact && sectionMap.contact) { %>
+      <% const contactSec = sectionMap.contact.contactContent; %>
+      <section class="section contact-section" id="lien-he">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-badge"><%= sectionMap.contact.subtitle || 'Liên hệ tư vấn' %></span>
+            <h2 class="section-title"><%= sectionMap.contact.title %></h2>
+            <% if (contactSec && contactSec.description) { %>
+              <p class="section-description"><%= contactSec.description %></p>
+            <% } %>
+          </div>
+
+          <div class="contact-layout">
+            <!-- Thông tin chuyên viên tư vấn chính -->
+            <div class="consultant-card">
+              <% if (salesContact) { %>
+                <div class="consultant-header">
+                  <% if (salesContact.avatarUrl) { %>
+                    <img src="<%= salesContact.avatarUrl %>" alt="<%= salesContact.fullName %>" class="consultant-avatar">
+                  <% } else { %>
+                    <div class="consultant-avatar" style="background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                      <%= salesContact.fullName ? salesContact.fullName.charAt(0) : 'P' %>
+                    </div>
+                  <% } %>
+                  <div class="consultant-info">
+                    <h4><%= salesContact.fullName %></h4>
+                    <p><%= salesContact.title || 'Chuyên viên tư vấn dự án' %></p>
+                  </div>
+                </div>
+
+                <div class="contact-channel-list">
+                  <% if (salesContact.phone) { %>
+                    <a href="tel:<%= salesContact.phone.replace(/\s+/g, '') %>" class="contact-channel-item">
+                      <span class="channel-icon">☎</span>
+                      <div>
+                        <div class="channel-label">Hotline tư vấn</div>
+                        <div class="channel-val"><%= salesContact.phone %></div>
+                      </div>
+                    </a>
+                  <% } %>
+
+                  <% if (salesContact.zaloUrl) { %>
+                    <a href="<%= salesContact.zaloUrl %>" target="_blank" rel="noopener noreferrer" class="contact-channel-item">
+                      <span class="channel-icon">Z</span>
+                      <div>
+                        <div class="channel-label">Kênh Zalo tư vấn</div>
+                        <div class="channel-val">Nhắn tin trực tiếp qua Zalo</div>
+                      </div>
+                    </a>
+                  <% } %>
+
+                  <% if (salesContact.email) { %>
+                    <a href="mailto:<%= salesContact.email %>" class="contact-channel-item">
+                      <span class="channel-icon">✉</span>
+                      <div>
+                        <div class="channel-label">Thư điện tử</div>
+                        <div class="channel-val"><%= salesContact.email %></div>
+                      </div>
+                    </a>
+                  <% } %>
+
+                  <% if (siteSettings.address) { %>
+                    <div class="contact-channel-item">
+                      <span class="channel-icon">📍</span>
+                      <div>
+                        <div class="channel-label">Văn phòng dự án</div>
+                        <div class="channel-val" style="font-weight: 500; font-size: 0.88rem;"><%= siteSettings.address %></div>
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Form đăng ký nhận thông tin tư vấn -->
+            <div class="form-card">
+              <form id="consultationForm" action="/lien-he" method="POST" novalidate>
+                <!-- CSRF Token -->
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <!-- Honeypot anti-spam field (hidden) -->
+                <input type="text" name="website_url_hp" class="hp-field" tabindex="-1" autocomplete="off">
+                <input type="hidden" name="source" value="landing_page">
+
+                <div class="form-alert" role="alert"></div>
+
+                <div class="form-group">
+                  <label for="fullName">Họ và tên Quý khách <span class="required">*</span></label>
+                  <input type="text" id="fullName" name="fullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" required maxlength="100">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="phone">Số điện thoại liên hệ <span class="required">*</span></label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="Ví dụ: 0901234567" required pattern="^(0|\+84)[3|5|7|8|9][0-9]{8}$">
+                  </div>
+                  <div class="form-group">
+                    <label for="interest">Nhu cầu quan tâm</label>
+                    <select id="interest" name="interest" class="form-control">
+                      <option value="Tư vấn thông tin tổng thể">Tư vấn thông tin tổng quan & pháp lý</option>
+                      <option value="Căn hộ 1 Phòng Ngủ (1BR)">Căn hộ 1 Phòng Ngủ (1BR)</option>
+                      <option value="Căn hộ 2 Phòng Ngủ (2BR)">Căn hộ 2 Phòng Ngủ (2BR)</option>
+                      <option value="Căn hộ 3 Phòng Ngủ (3BR)">Căn hộ 3 Phòng Ngủ (3BR)</option>
+                      <option value="Sky Villa Penthouse">Sky Villa Penthouse</option>
+                      <option value="Đăng ký tham quan thực tế">Đăng ký tham quan thực tế dự án</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="note">Ghi chú hoặc câu hỏi cần giải đáp (tùy chọn)</label>
+                  <textarea id="note" name="note" class="form-control" placeholder="Quý khách có yêu cầu gì về tầng, hướng đón gió hoặc lịch hẹn tư vấn?" maxlength="1000"></textarea>
+                </div>
+
+                <!-- Checkbox đồng ý được liên hệ (KHÔNG chọn sẵn theo quy định) -->
+                <div class="form-group form-consent-group" style="margin: 18px 0;">
+                  <label for="consentGiven" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.88rem; font-weight: normal; color: var(--color-text);">
+                    <input type="checkbox" id="consentGiven" name="consentGiven" value="true" required style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--color-primary); cursor: pointer;">
+                    <span>Tôi đồng ý để chuyên viên dự án liên hệ qua điện thoại/Zalo để tư vấn thông tin và cung cấp tài liệu chi tiết. <span class="required">*</span></span>
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="btnSubmitConsultation" style="width: 100%; min-height: 52px; font-size: 1.05rem;">
+                  <%= salesContact && salesContact.ctaText ? salesContact.ctaText : 'Gửi yêu cầu nhận tư vấn' %>
+                </button>
+                <p style="font-size: 0.78rem; color: var(--color-text-muted); text-align: center; margin-top: 10px; margin-bottom: 0;">
+                  <%= contactSec?.note || 'Thông tin của Quý khách được cam kết bảo mật tuyệt đối.' %>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+  </main>
+
+  <!-- 10. Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Mobile Sticky Contact Bar (Gọi điện, Messenger, Zalo) -->
+  <%- include('../partials/mobile-contact-bar') %>
+
+  <!-- Core JavaScript -->
+  <script src="/js/main.js"></script>
+</body>
+</html>

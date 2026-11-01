@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof isPreview !== 'undefined' && isPreview ? '[XEM TRƯỚC ADMIN] ' + article.title : (article.seoTitle || (article.title + ' - ' + siteSettings.projectName)) %></title>
+  <meta name="description" content="<%= article.seoDescription || article.excerpt %>">
+  <link rel="canonical" href="<%= appUrl %>/bai-viet/<%= article.slug %>">
+
+  <% if (typeof isPreview !== 'undefined' && isPreview) { %>
+    <meta name="robots" content="noindex, nofollow">
+  <% } %>
+
+  <!-- CSRF Protection Token -->
+  <meta name="csrf-token" content="<%= csrfToken %>">
+
+  <!-- OpenGraph Metadata for Social Sharing (Facebook, Zalo) -->
+  <meta property="og:title" content="<%= article.seoTitle || article.title %>">
+  <meta property="og:description" content="<%= article.seoDescription || article.excerpt %>">
+  <meta property="og:image" content="<%= article.ogImage || article.coverImage %>">
+  <meta property="og:url" content="<%= appUrl %>/bai-viet/<%= article.slug %>">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="<%= article.publishedAt ? article.publishedAt.toISOString() : '' %>">
+  <meta property="article:author" content="<%= article.author || 'Ban Biên Tập' %>">
+
+  <!-- Structured Data: Schema.org Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "<%= article.title.replace(/"/g, '\\"') %>",
+    "description": "<%= (article.excerpt || '').replace(/"/g, '\\"') %>",
+    "image": "<%= article.coverImage %>",
+    "datePublished": "<%= article.publishedAt ? article.publishedAt.toISOString() : new Date().toISOString() %>",
+    "dateModified": "<%= (article.updatedAt || article.publishedAt || new Date()).toISOString() %>",
+    "author": {
+      "@type": "Organization",
+      "name": "<%= (article.author || siteSettings.projectName).replace(/"/g, '\\"') %>"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "<%= siteSettings.projectName.replace(/"/g, '\\"') %>"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "<%= appUrl %>/bai-viet/<%= article.slug %>"
+    }
+  }
+  </script>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <% if (typeof isPreview !== 'undefined' && isPreview) { %>
+    <div style="background: #FEF3C7; color: #92400E; padding: 12px 20px; font-weight: 700; text-align: center; border-bottom: 2px solid #F59E0B; font-size: 14px;">
+      ⚠️ CHẾ ĐỘ XEM TRƯỚC DÀNH CHO QUẢN TRỊ VIÊN — BÀI VIẾT BẢN NHÁP CHƯA CÔNG BỐ RA CÔNG CHÚNG
+    </div>
+  <% } %>
+
+  <!-- Header -->
+  <%- include('../partials/header') %>
+
+  <main id="mainContent">
+    <div class="container">
+      <article class="article-header">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb" aria-label="Đường dẫn trang">
+          <a href="/">Trang chủ</a>
+          <span class="breadcrumb-sep">&rsaquo;</span>
+          <a href="/#tin-tuc">Tin tức</a>
+          <span class="breadcrumb-sep">&rsaquo;</span>
+          <span aria-current="page"><%= article.category || 'Bài viết' %></span>
+        </nav>
+
+        <h1 class="article-title"><%= article.title %></h1>
+
+        <div class="article-meta-bar">
+          <span class="article-category"><%= article.category || 'Tin tức' %></span>
+          <span>&bull;</span>
+          <time datetime="<%= article.publishedAt ? article.publishedAt.toISOString() : '' %>">
+            <%= article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Bản nháp chưa công bố' %>
+          </time>
+          <% if (article.author) { %>
+            <span>&bull;</span>
+            <span>Tác giả: <strong><%= article.author %></strong></span>
+          <% } %>
+        </div>
+
+        <p class="lead" style="font-weight: 500; color: var(--color-text);">
+          <%= article.excerpt %>
+        </p>
+      </article>
+
+      <!-- Cover Image -->
+      <% if (article.coverImage) { %>
+        <div class="article-featured-media">
+          <img src="<%= article.coverImage %>" alt="<%= article.title %>" fetchpriority="high">
+        </div>
+      <% } %>
+
+      <!-- Article Rich Content Body (Sanitized on backend) -->
+      <div class="article-content-wrapper">
+        <%- article.contentHtml %>
+
+        <!-- Post-Article Consultation CTA Box -->
+        <div class="article-cta-box">
+          <span class="section-badge" style="margin-bottom: 8px;">Tư vấn dự án</span>
+          <h3>Quý khách quan tâm đến <%= siteSettings.projectName %>?</h3>
+          <p>
+            Đăng ký để nhận trọn bộ tài liệu thiết kế mặt bằng chi tiết, chính sách bán hàng và đăng ký tham quan thực tế.
+          </p>
+          <a href="/#lien-he" class="btn btn-primary" style="min-width: 220px;">
+            <%= salesContact && salesContact.ctaText ? salesContact.ctaText : 'Đăng ký nhận tư vấn ngay' %>
+          </a>
+        </div>
+      </div>
+
+      <!-- Related Articles -->
+      <% if (relatedArticles && relatedArticles.length > 0) { %>
+        <section class="related-section">
+          <h2 class="related-title">Bài viết liên quan</h2>
+          <div class="articles-grid" style="margin-bottom: var(--space-3xl);">
+            <% relatedArticles.forEach(item => { %>
+              <article class="article-card">
+                <div class="article-thumbnail">
+                  <img src="<%= item.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80' %>" alt="<%= item.title %>" loading="lazy">
+                </div>
+                <div class="article-card-body">
+                  <div>
+                    <div class="article-meta">
+                      <span class="article-category"><%= item.category || 'Tin tức' %></span>
+                      <span>&bull;</span>
+                      <time datetime="<%= item.publishedAt.toISOString() %>">
+                        <%= new Date(item.publishedAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                      </time>
+                    </div>
+                    <h3 class="article-card-title">
+                      <a href="/bai-viet/<%= item.slug %>"><%= item.title %></a>
+                    </h3>
+                    <p class="article-excerpt"><%= item.excerpt %></p>
+                  </div>
+                  <a href="/bai-viet/<%= item.slug %>" class="article-read-more">
+                    Đọc tiếp &rarr;
+                  </a>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Mobile Sticky Contact Bar (Gọi điện, Messenger, Zalo) -->
+  <%- include('../partials/mobile-contact-bar') %>
+
+  <!-- Core JavaScript -->
+  <script src="/js/main.js"></script>
+</body>
+</html>

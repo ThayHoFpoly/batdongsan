@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../../partials/admin-header') %>
+
+      <main class="admin-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--admin-primary); margin: 0;">Khách hàng đăng ký tư vấn (<%= pagination.total %>)</h2>
+            <p style="font-size: 13px; color: var(--admin-text-muted); margin: 2px 0 0 0;">Tiếp nhận thông tin người mua, cập nhật tiến trình cuộc gọi và ghi chú chăm sóc.</p>
+          </div>
+        </div>
+
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger"><%= errorMsg %></div>
+        <% } %>
+
+        <!-- Thanh Tìm Kiếm & Bộ Lọc Nhanh -->
+        <div class="card" style="margin-bottom: 16px;">
+          <div class="card-body" style="padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="/admin/leads?status=all" class="btn btn-sm <%= filters.status === 'all' ? 'btn-primary' : 'btn-outline' %>">
+                Tất cả (<%= counts.all %>)
+              </a>
+              <a href="/admin/leads?status=new" class="btn btn-sm <%= filters.status === 'new' ? 'btn-primary' : 'btn-outline' %>">
+                Khách mới (<%= counts.new %>)
+              </a>
+              <a href="/admin/leads?status=contacted" class="btn btn-sm <%= filters.status === 'contacted' ? 'btn-primary' : 'btn-outline' %>">
+                Đã liên hệ (<%= counts.contacted %>)
+              </a>
+              <a href="/admin/leads?status=closed" class="btn btn-sm <%= filters.status === 'closed' ? 'btn-primary' : 'btn-outline' %>">
+                Đã hoàn tất (<%= counts.closed %>)
+              </a>
+            </div>
+
+            <form action="/admin/leads" method="GET" style="display: flex; gap: 8px;">
+              <input type="hidden" name="status" value="<%= filters.status || 'all' %>">
+              <input type="text" name="q" class="form-control" placeholder="Tìm tên, SĐT..." value="<%= filters.q || '' %>" style="max-width: 200px; height: 34px; font-size: 13px;">
+              <button type="submit" class="btn btn-sm btn-outline">Tìm</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Bố Cục Danh Sách & Chi Tiết -->
+        <div style="display: grid; grid-template-columns: <%= detailLead ? '1.4fr 1fr' : '1fr' %>; gap: 24px; align-items: start;">
+          <!-- Bảng Danh Sách -->
+          <div class="card">
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Họ và tên</th>
+                      <th>Số điện thoại</th>
+                      <th>Nhu cầu</th>
+                      <th>Thời gian gửi</th>
+                      <th>Trạng thái</th>
+                      <th style="text-align: right; width: 140px;">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (leads && leads.length > 0) { %>
+                      <% leads.forEach(ld => { %>
+                        <tr style="<%= detailLead && detailLead._id.toString() === ld._id.toString() ? 'background-color: #FEF9C3;' : '' %>">
+                          <td>
+                            <strong><%= ld.fullName %></strong>
+                            <% if (ld.consentGiven) { %>
+                              <span title="Đã xác nhận đồng ý nhận cuộc gọi tư vấn" style="color: var(--admin-success); font-size: 13px;">&check;</span>
+                            <% } %>
+                          </td>
+                          <td>
+                            <a href="tel:<%= ld.phone %>" style="font-weight: 700; color: var(--admin-primary);">
+                              <%= ld.phone %>
+                            </a>
+                          </td>
+                          <td><%= ld.interest || 'Chung' %></td>
+                          <td style="font-size: 12.5px; color: var(--admin-text-muted);">
+                            <%= new Date(ld.createdAt).toLocaleString('vi-VN') %>
+                          </td>
+                          <td>
+                            <% if (ld.status === 'new') { %>
+                              <span class="badge badge-danger">Mới</span>
+                            <% } else if (ld.status === 'contacted') { %>
+                              <span class="badge badge-warning">Đã liên hệ</span>
+                            <% } else { %>
+                              <span class="badge badge-success">Đã hoàn thành</span>
+                            <% } %>
+                          </td>
+                          <td style="text-align: right;">
+                            <a href="/admin/leads?detail=<%= ld._id %>&status=<%= filters.status || 'all' %>&q=<%= filters.q || '' %>" class="btn btn-sm btn-primary">
+                              Xem
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger-outline btn-delete-confirm" data-action="/admin/leads/<%= ld._id %>/delete" data-item-name="<%= ld.fullName %> (<%= ld.phone %>)" data-item-type="yêu cầu tư vấn của khách hàng" title="Xóa yêu cầu tư vấn">
+                              Xóa
+                            </button>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
+                          Không có yêu cầu tư vấn nào phù hợp.
+                        </td>
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Phân Trang -->
+              <% if (pagination.totalPages > 1) { %>
+                <div style="padding: 16px 20px; border-top: 1px solid var(--admin-border); display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; color: var(--admin-text-muted);">
+                    Trang <%= pagination.page %> / <%= pagination.totalPages %> (Tổng cộng <%= pagination.total %> khách)
+                  </span>
+                  <div style="display: flex; gap: 6px;">
+                    <% if (pagination.page > 1) { %>
+                      <a href="/admin/leads?page=<%= pagination.page - 1 %>&status=<%= filters.status || 'all' %>&q=<%= filters.q || '' %>" class="btn btn-sm btn-outline">&larr; Trước</a>
+                    <% } %>
+                    <% if (pagination.page < pagination.totalPages) { %>
+                      <a href="/admin/leads?page=<%= pagination.page + 1 %>&status=<%= filters.status || 'all' %>&q=<%= filters.q || '' %>" class="btn btn-sm btn-outline">Sau &rarr;</a>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Khối Xem & Cập Nhật Chi Tiết Lead (nếu có chọn) -->
+          <% if (detailLead) { %>
+            <div class="card" style="position: sticky; top: 80px;">
+              <div class="card-header">
+                <h2 class="card-title">Chi tiết khách hàng</h2>
+                <a href="/admin/leads?status=<%= filters.status || 'all' %>" class="btn btn-sm btn-outline">&times; Đóng</a>
+              </div>
+              <div class="card-body">
+                <div style="margin-bottom: 16px;">
+                  <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--admin-primary); margin-bottom: 4px;">
+                    <%= detailLead.fullName %>
+                  </h3>
+                  <div style="font-size: 1.1rem; font-weight: 700; color: var(--admin-accent-dark); margin-bottom: 12px;">
+                    <a href="tel:<%= detailLead.phone %>">☎ <%= detailLead.phone %></a>
+                  </div>
+
+                  <div style="background: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid var(--admin-border); font-size: 13px; margin-bottom: 16px;">
+                    <div style="margin-bottom: 4px;"><strong>Nhu cầu:</strong> <%= detailLead.interest || 'Chung' %></div>
+                    <div style="margin-bottom: 4px;"><strong>Thời gian gửi:</strong> <%= new Date(detailLead.createdAt).toLocaleString('vi-VN') %></div>
+                    <div style="margin-bottom: 4px;"><strong>Đồng ý tư vấn:</strong> <%= detailLead.consentGiven ? 'Đã đồng ý lúc ' + new Date(detailLead.consentAt).toLocaleString('vi-VN') : 'Chưa xác nhận' %></div>
+                    <div><strong>Nguồn:</strong> <code><%= detailLead.source %></code> (IP: <%= detailLead.ipAddress || 'N/A' %>)</div>
+                  </div>
+
+                  <% if (detailLead.note) { %>
+                    <div style="margin-bottom: 16px;">
+                      <label style="font-weight: 700; font-size: 13px;">Ghi chú từ khách hàng:</label>
+                      <div style="background: #FFFFFF; border: 1px solid var(--admin-border); padding: 10px; border-radius: 6px; font-style: italic; color: #334155;">
+                        &ldquo;<%= detailLead.note %>&rdquo;
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
+
+                <!-- Form Cập Nhật Trạng Thái & Ghi Chú Nội Bộ -->
+                <form action="/admin/leads/<%= detailLead._id %>" method="POST">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <div class="form-group">
+                    <label for="leadStatus">Trạng thái xử lý</label>
+                    <select id="leadStatus" name="status" class="form-control" style="font-weight: 700;">
+                      <option value="new" <%= detailLead.status === 'new' ? 'selected' : '' %>>Khách mới (Chưa liên hệ)</option>
+                      <option value="contacted" <%= detailLead.status === 'contacted' ? 'selected' : '' %>>Đã liên hệ tư vấn</option>
+                      <option value="closed" <%= detailLead.status === 'closed' ? 'selected' : '' %>>Đã hoàn thành / Đã chốt</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="internalNotes">Ghi chú nội bộ của tư vấn viên</label>
+                    <textarea id="internalNotes" name="internalNotes" class="form-control" style="min-height: 90px;" placeholder="Ghi chú nội dung trao đổi, lịch hẹn xem nhà mẫu..."><%= detailLead.internalNotes || '' %></textarea>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Lưu cập nhật khách hàng
+                  </button>
+                </form>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

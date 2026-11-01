@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Quản trị</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <%- include('../partials/admin-sidebar') %>
+
+    <div class="admin-main">
+      <%- include('../partials/admin-header') %>
+
+      <main class="admin-body">
+        <% if (successMsg) { %>
+          <div class="alert alert-success"><%= successMsg %></div>
+        <% } %>
+        <% if (errorMsg) { %>
+          <div class="alert alert-danger"><%= errorMsg %></div>
+        <% } %>
+
+        <div style="max-width: 820px;">
+          <form action="/admin/contact" method="POST" data-track-changes="true" novalidate>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">Đầu mối tư vấn chính & Kênh liên hệ trực tiếp</h2>
+                <div>
+                  <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+                    <input type="checkbox" name="isEnabled" value="true" <%= contact && contact.isEnabled ? 'checked' : '' %> style="width: 18px; height: 18px; accent-color: var(--admin-primary);">
+                    <span>Bật hiển thị thông tin tư vấn</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fullName">Họ và tên chuyên viên tư vấn <span class="required">*</span></label>
+                    <input type="text" id="fullName" name="fullName" class="form-control" value="<%= contact ? contact.fullName : '' %>" placeholder="Ví dụ: Võ Minh Quân" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="title">Chức danh / Vị trí</label>
+                    <input type="text" id="title" name="title" class="form-control" value="<%= contact ? contact.title : '' %>" placeholder="Ví dụ: Chuyên viên tư vấn dự án cao cấp">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="phone">Số điện thoại Hotline tư vấn <span class="required">*</span></label>
+                    <div style="display: flex; gap: 8px;">
+                      <input type="tel" id="phone" name="phone" class="form-control" value="<%= contact ? contact.phone : '' %>" placeholder="0901234567" required>
+                      <button type="button" class="btn btn-outline btn-test-link" data-target-input="#phone" title="Gọi thử nghiệm">Gọi thử</button>
+                    </div>
+                    <div class="form-hint">Sử dụng định dạng di động 10 số (dùng cho liên kết tel:).</div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="email">Địa chỉ Email liên hệ</label>
+                    <input type="email" id="email" name="email" class="form-control" value="<%= contact ? (contact.email || '') : '' %>" placeholder="tuvan@horizonriverside.vn">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="avatarUrl">Ảnh đại diện chuyên viên</label>
+                  <div class="image-picker-group">
+                    <input type="text" id="avatarUrl" name="avatarUrl" class="form-control" value="<%= contact ? (contact.avatarUrl || '') : '' %>" placeholder="URL hình ảnh chân dung">
+                    <button type="button" class="btn btn-outline btn-open-media-picker" data-target-input="#avatarUrl" data-target-preview="#avatarPreview">Chọn từ thư viện</button>
+                  </div>
+                  <% if (contact && contact.avatarUrl) { %>
+                    <img id="avatarPreview" src="<%= contact.avatarUrl %>" class="image-preview-thumb" style="border-radius: 50%;" alt="Avatar preview">
+                  <% } else { %>
+                    <img id="avatarPreview" class="image-preview-thumb" style="border-radius: 50%; display: none;" alt="Avatar preview">
+                  <% } %>
+                </div>
+
+                <div class="form-group">
+                  <label for="messengerUrl">Đường dẫn Facebook Messenger</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="url" id="messengerUrl" name="messengerUrl" class="form-control" value="<%= contact ? (contact.messengerUrl || '') : '' %>" placeholder="https://m.me/yourpage">
+                    <button type="button" class="btn btn-outline btn-test-link" data-target-input="#messengerUrl">Kiểm tra liên kết</button>
+                  </div>
+                  <div class="form-hint">Để trống nếu chưa có kênh Messenger; nút Messenger trên mobile sẽ tự động ẩn.</div>
+                </div>
+
+                <div class="form-group">
+                  <label for="zaloUrl">Đường dẫn Zalo tư vấn</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="url" id="zaloUrl" name="zaloUrl" class="form-control" value="<%= contact ? (contact.zaloUrl || '') : '' %>" placeholder="https://zalo.me/0901234567">
+                    <button type="button" class="btn btn-outline btn-test-link" data-target-input="#zaloUrl">Kiểm tra liên kết</button>
+                  </div>
+                  <div class="form-hint">Đường dẫn kết nối Zalo (ví dụ https://zalo.me/số_điện_thoại); nút Zalo trên mobile sẽ tự động ẩn nếu để trống.</div>
+                </div>
+
+                <div class="form-group">
+                  <label for="ctaText">Nội dung nút kêu gọi hành động (CTA Text)</label>
+                  <input type="text" id="ctaText" name="ctaText" class="form-control" value="<%= contact ? (contact.ctaText || '') : 'Nhận tư vấn dự án' %>">
+                </div>
+
+                <div style="margin-top: 24px;">
+                  <button type="submit" class="btn btn-primary" style="min-width: 160px;">
+                    Lưu thông tin tư vấn
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <%- include('../partials/admin-modals') %>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

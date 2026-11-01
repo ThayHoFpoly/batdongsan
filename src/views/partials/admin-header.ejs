@@ -1,0 +1,21 @@
+<header class="admin-topbar">
+  <div class="topbar-left">
+    <button type="button" class="sidebar-toggle-btn" aria-label="Mở menu quản trị">
+      ☰
+    </button>
+    <h1 style="font-size: 1.15rem; font-weight: 700; color: var(--admin-primary); margin: 0;">
+      <%= title %>
+    </h1>
+  </div>
+
+  <div class="topbar-right">
+    <a href="/" target="_blank" class="btn btn-sm btn-outline">
+      <span>Xem trang chủ</span>
+      <span>&nearr;</span>
+    </a>
+    <span style="font-size: 13px; font-weight: 600; color: var(--admin-text-muted);">
+      <%= currentUser ? currentUser.displayName : 'Quản trị viên' %>
+    </span>
+  </div>
+</header>
+

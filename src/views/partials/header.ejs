@@ -1,0 +1,89 @@
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="site-brand" aria-label="Trang chủ <%= siteSettings.projectName %>">
+      <span class="brand-title"><%= siteSettings.projectName %></span>
+      <% if (siteSettings.tagline) { %>
+        <span class="brand-subtitle"><%= siteSettings.tagline %></span>
+      <% } %>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="nav-desktop" aria-label="Điều hướng chính">
+      <% if (typeof navItems !== 'undefined' && navItems && navItems.length > 0) { %>
+        <% navItems.forEach(item => { %>
+          <a href="<%= item.href %>"><%= item.label %></a>
+        <% }) %>
+      <% } else { %>
+        <a href="/#tong-quan">Tổng quan</a>
+        <a href="/#vi-tri">Vị trí</a>
+        <a href="/#tien-ich">Tiện ích</a>
+        <a href="/#mat-bang">Mặt bằng</a>
+        <a href="/#tin-tuc">Tin tức</a>
+      <% } %>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-cta-group">
+      <% if (salesContact && salesContact.phone) { %>
+        <a href="tel:<%= salesContact.phone.replace(/\s+/g, '') %>" class="btn btn-outline" style="display: none; @media(min-width: 600px){display:inline-flex;}">
+          <span>Hotline: <%= salesContact.phone %></span>
+        </a>
+      <% } %>
+      <a href="/#lien-he" class="btn btn-primary">
+        <%= salesContact && salesContact.ctaText ? salesContact.ctaText : 'Nhận tư vấn' %>
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button type="button" class="mobile-nav-toggle" aria-label="Mở menu điều hướng" aria-expanded="false" aria-controls="mobileDrawer">
+        <span class="hamburger-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Drawer Backdrop -->
+<div class="mobile-drawer-backdrop" aria-hidden="true"></div>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-drawer" id="mobileDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Menu điều hướng trên điện thoại">
+  <div>
+    <div class="mobile-drawer-header">
+      <div class="site-brand">
+        <span class="brand-title" style="font-size: 1.15rem;"><%= siteSettings.projectName %></span>
+      </div>
+      <button type="button" class="mobile-drawer-close" aria-label="Đóng menu">
+        &times;
+      </button>
+    </div>
+
+    <ul class="mobile-nav-links">
+      <% if (typeof navItems !== 'undefined' && navItems && navItems.length > 0) { %>
+        <% navItems.forEach(item => { %>
+          <li><a href="<%= item.href %>"><%= item.label %></a></li>
+        <% }) %>
+      <% } else { %>
+        <li><a href="/#tong-quan">Tổng quan</a></li>
+        <li><a href="/#vi-tri">Vị trí</a></li>
+        <li><a href="/#tien-ich">Tiện ích</a></li>
+        <li><a href="/#mat-bang">Mặt bằng</a></li>
+        <li><a href="/#tin-tuc">Tin tức</a></li>
+      <% } %>
+    </ul>
+  </div>
+
+  <div class="mobile-drawer-footer">
+    <% if (salesContact && salesContact.phone) { %>
+      <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 6px;">Hotline tư vấn 24/7:</p>
+      <a href="tel:<%= salesContact.phone.replace(/\s+/g, '') %>" class="btn btn-outline" style="width: 100%; margin-bottom: 12px;">
+        <%= salesContact.phone %>
+      </a>
+    <% } %>
+    <a href="/#lien-he" class="btn btn-primary" style="width: 100%;">
+      Đăng ký nhận báo giá
+    </a>
+  </div>
+</div>

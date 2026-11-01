@@ -1,0 +1,99 @@
+<aside class="admin-sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">HORIZON CMS</div>
+  </div>
+
+  <ul class="sidebar-nav">
+    <li class="<%= activeNav === 'dashboard' ? 'active' : '' %>">
+      <a href="/admin">
+        <span class="sidebar-icon">📊</span>
+        <span>Tổng quan</span>
+      </a>
+    </li>
+
+    <div class="nav-category">Nội Dung Website</div>
+
+    <li class="<%= activeNav === 'settings' ? 'active' : '' %>">
+      <a href="/admin/settings">
+        <span class="sidebar-icon">⚙️</span>
+        <span>Cài đặt dự án & SEO</span>
+      </a>
+    </li>
+
+    <li class="<%= activeNav === 'contact' ? 'active' : '' %>">
+      <a href="/admin/contact">
+        <span class="sidebar-icon">👤</span>
+        <span>Tư vấn viên & Hotline</span>
+      </a>
+    </li>
+
+    <li class="<%= activeNav === 'sections' ? 'active' : '' %>">
+      <a href="/admin/sections">
+        <span class="sidebar-icon">📑</span>
+        <span>Section Trang chủ</span>
+      </a>
+    </li>
+
+    <li class="<%= activeNav === 'articles' ? 'active' : '' %>">
+      <a href="/admin/articles">
+        <span class="sidebar-icon">📰</span>
+        <span>Quản lý bài viết</span>
+      </a>
+    </li>
+
+    <li class="<%= activeNav === 'media' ? 'active' : '' %>">
+      <a href="/admin/media">
+        <span class="sidebar-icon">🖼️</span>
+        <span>Thư viện hình ảnh</span>
+      </a>
+    </li>
+
+    <div class="nav-category">Khách Hàng & Liên Hệ</div>
+
+    <li class="<%= activeNav === 'leads' ? 'active' : '' %>">
+      <a href="/admin/leads">
+        <span class="sidebar-icon">📥</span>
+        <span>Yêu cầu tư vấn</span>
+      </a>
+    </li>
+
+    <div class="nav-category">Hệ Thống</div>
+
+    <li class="<%= activeNav === 'profile' ? 'active' : '' %>">
+      <a href="/admin/change-password">
+        <span class="sidebar-icon">🔑</span>
+        <span>Đổi mật khẩu</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/" target="_blank">
+        <span class="sidebar-icon">🌐</span>
+        <span>Xem website public &nearr;</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="/db-status" target="_blank">
+        <span class="sidebar-icon">🩺</span>
+        <span>Health check DB &nearr;</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <span class="user-name"><%= currentUser ? currentUser.displayName : 'Admin' %></span>
+      <span class="user-email"><%= currentUser ? currentUser.email : '' %></span>
+    </div>
+    <form action="/admin/logout" method="POST" style="margin: 0;">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button type="submit" class="btn btn-sm btn-outline" style="color: #F87171; border-color: rgba(248, 113, 113, 0.3);" title="Đăng xuất">
+        Thoát
+      </button>
+    </form>
+  </div>
+</aside>
+
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+
